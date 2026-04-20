@@ -274,6 +274,47 @@ input,textarea,select{font-family:inherit}
 
 /* SPACER at bottom of scroll */
 .scroll-spacer{height:20px}
+/* ── WALKTHROUGH ── */
+.wt-overlay{position:fixed;inset:0;background:#0F0F14;z-index:500;display:flex;flex-direction:column;max-width:430px;margin:0 auto}
+.wt-progress{display:flex;gap:4px;padding:16px 16px 0}
+.wt-pip{flex:1;height:3px;border-radius:2px;background:rgba(240,237,232,0.1);transition:background 0.3s}
+.wt-pip.done{background:#F5C842}
+.wt-pip.active{background:rgba(245,200,66,0.5)}
+.wt-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+.wt-icon{font-size:48px;margin-bottom:20px;line-height:1}
+.wt-title{font-size:22px;font-weight:500;color:#F0EDE8;margin-bottom:16px;line-height:1.3}
+.wt-text{font-size:14px;color:#A09890;line-height:1.75;white-space:pre-wrap;text-align:left;background:rgba(240,237,232,0.04);border-radius:12px;padding:16px}
+.wt-footer{padding:24px}
+.wt-cta{width:100%;padding:14px;background:#F5C842;color:#1A1200;border:none;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wt-skip{display:block;text-align:center;font-size:11px;color:#605850;margin-top:12px;cursor:pointer;padding:4px;-webkit-tap-highlight-color:transparent}
+
+/* ── HELP BUTTON ── */
+.help-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(240,237,232,0.15);background:transparent;color:#A09890;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:all 0.15s}
+.help-btn:active{background:rgba(240,237,232,0.08)}
+
+/* ── HELP SHEET ── */
+.help-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;display:flex;flex-direction:column;justify-content:flex-end;max-width:430px;margin:0 auto}
+.help-sheet{background:#1A1A24;border-radius:16px 16px 0 0;max-height:85vh;display:flex;flex-direction:column;border-top:1px solid rgba(240,237,232,0.15)}
+.help-sheet-hdr{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(240,237,232,0.08);flex-shrink:0}
+.help-sheet-title{font-size:15px;font-weight:500;color:#F0EDE8}
+.help-close{font-size:20px;color:#605850;cursor:pointer;padding:0 4px;line-height:1;-webkit-tap-highlight-color:transparent}
+.help-tabs{display:flex;gap:0;padding:0;border-bottom:1px solid rgba(240,237,232,0.08);overflow-x:auto;flex-shrink:0}
+.help-tabs::-webkit-scrollbar{display:none}
+.help-tab{padding:10px 14px;font-size:11px;font-weight:500;color:#605850;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.help-tab.a{color:#F5C842;border-bottom-color:#F5C842}
+.help-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+.help-body::-webkit-scrollbar{display:none}
+.help-section{margin-bottom:18px}
+.help-section:last-child{margin-bottom:0}
+.help-section-hdr{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#605850;margin-bottom:6px}
+.help-section-body{font-size:13px;color:#A09890;line-height:1.65;white-space:pre-wrap}
+.help-replay{width:100%;padding:11px;background:rgba(245,200,66,0.1);color:#F5C842;border:1px solid rgba(245,200,66,0.25);border-radius:9px;font-size:12px;font-weight:500;cursor:pointer;margin-top:4px;-webkit-tap-highlight-color:transparent}
+
+/* ── FIRST VISIT BANNER ── */
+.fv-banner{margin:10px 16px 0;background:rgba(55,138,221,0.08);border:1px solid rgba(55,138,221,0.25);border-radius:9px;padding:10px 13px;display:flex;align-items:flex-start;gap:10px}
+.fv-text{flex:1;font-size:12px;color:#85B7EB;line-height:1.55}
+.fv-dismiss{font-size:18px;color:#378ADD;cursor:pointer;flex-shrink:0;line-height:1;padding:0 2px;-webkit-tap-highlight-color:transparent}
+
 </style>
 </head>
 <body>
@@ -526,6 +567,9 @@ function render(){
   nav.innerHTML="";
 
   // LEVEL UP SCREEN
+  // Check walkthrough
+  if(!S.onboardingDone){renderWalkthrough(app);buildNav(nav);return;}
+
   if(S.showLU&&S.luData){
     app.innerHTML='<div style="padding:16px"><div class="lu-wrap"><div class="lu-lvl">Level '+S.luData.lvl+' \u2014 '+S.luData.name+'</div><div class="lu-sub">The city responds to your commitment.</div><div class="lu-unlock">'+S.luData.unlock+'</div><button class="lu-btn" id="lu-b">Continue building &#8594;</button></div></div>';
     document.getElementById("lu-b").onclick=function(){S.showLU=false;save();render();};
@@ -542,14 +586,16 @@ function render(){
   var hdr=document.createElement("div");hdr.className="hdr";
   hdr.innerHTML='<div class="hdr-top"><span class="hdr-title">The Architect</span><div class="xp-row"><span class="xp-val">'+S.xp+'</span><span class="xp-lbl">XP</span><span class="lvl-badge">LVL '+lvl.lvl+'</span></div></div><div class="xp-bar"><div class="xp-fill" style="width:'+pct+'%"></div></div><div class="xp-sub"><span>'+S.xp+' / '+(nxt?nxt.xp:'max')+' XP</span><span>'+lvl.name+'</span></div>';
   app.appendChild(hdr);
+  injectHelpButton(hdr);
 
   if(S.view==="today") renderToday(app);
-  else if(S.view==="city") renderCity(app);
-  else if(S.view==="boss") renderBoss(app);
-  else if(S.view==="review") renderReview(app);
-  else if(S.view==="vision") renderVision(app);
-  else if(S.view==="parking") renderParking(app);
+  else if(S.view==="city"){renderCity(app);renderFVBanner(app,"city");}
+  else if(S.view==="boss"){renderBoss(app);renderFVBanner(app,"boss");}
+  else if(S.view==="review"){renderReview(app);renderFVBanner(app,"review");}
+  else if(S.view==="vision"){renderVision(app);renderFVBanner(app,"vision");}
+  else if(S.view==="parking"){renderParking(app);renderFVBanner(app,"parking");}
 
+  if(S.helpOpen) renderHelpSheet(app);
   buildNav(nav);
 
   if(S.openMenu){
@@ -1137,8 +1183,210 @@ function renderModal(app, type){
   app.appendChild(overlay);
 }
 
+
+// ══════════════════════════════════════════
+// ONBOARDING SYSTEM
+// ══════════════════════════════════════════
+
+var WALKTHROUGH=[
+  {icon:"◈",iconColor:"#F5C842",title:"You are The Architect.",body:"This app is your system for building the life and work you've been designing. It's not a to-do list. It's a city being built from ruins — and you are the one building it.\n\nEvery task you complete earns XP. XP levels you up. Leveling up unlocks new districts. The city becomes a real-time map of how far you've come.",cta:"Let's walk through it"},
+  {icon:"🏚",iconColor:"#A09890",title:"Level 1: The Clearing.",body:"You moved into your apartment 6 months ago and never fully unpacked. That is where this starts — not with ambition, but with finishing what you started.\n\nLevel 1 has three tracks running in parallel: Physical Clearing (your space), Digital Clearing (your phone and apps), and Setup (your systems). The foundation has to be real before anything is built on it.",cta:"Got it"},
+  {icon:"☀",iconColor:"#EF9F27",title:"Your day has a shape.",body:"Every day follows a prescribed block structure: morning anchor → rest → deep work → rest or life activity → shallow work → rest → evening close.\n\nYou pick your energy level each morning. Low energy shows only your 5 MVD (minimum viable day) tasks. Medium and High reveal more. Rest is built in — not a reward for finishing. Just part of the structure.",cta:"Makes sense"},
+  {icon:"✦",iconColor:"#7F77DD",title:"Tasks have rules.",body:"Every task shows its category, what seed it builds toward, how long you're committing to, and how much XP it earns. You're committing to the time — not to finishing.\n\nSkip logic: habit tasks like Morning Pages don't carry forward when skipped (never miss twice). Clearing and seed tasks carry to next week. Life tasks carry once — skip twice and they move to the Parking Lot.",cta:"Understood"},
+  {icon:"↗",iconColor:"#E24B4A",title:"There are bosses.",body:"At Week 4, you face The Chaos Boss. It has 5 defeat conditions worth 50 XP each. The boss tests whether the foundation actually held — did the morning anchor survive? Did the clearing stick? Are the seeds in the ground?\n\nDefeating the boss is proof the foundation holds. Not finishing every task. Not being perfect. Proof.",cta:"I'm ready for it"},
+  {icon:"◎",iconColor:"#1D9E75",title:"The weekly review is not optional.",body:"Every Sunday, 30 minutes. Score the week, name what moved and what blocked, set one task per active seed for the coming week. It earns 30 XP.\n\nWithout this, the 12-week cycle has no accountability and you're just completing tasks with no direction. It is the most important habit in the system.",cta:"30 minutes. Every Sunday."},
+  {icon:"◈",iconColor:"#F5C842",title:"One thing right now.",body:"Before you do anything else: go to Pre-Week, find the task 'Move phone charger outside the bedroom right now', and do it.\n\nNot tomorrow. Tonight. That one physical action is the first brick.\n\nThe help button (?) is always in the header when you need to revisit how anything works.",cta:"Start building"}
+];
+
+var TAB_EXPLAINERS={
+  today:{title:"Today tab",sections:[
+    {h:"Energy levels",b:"Low energy shows only your 5 MVD tasks — the non-negotiables. Medium and High reveal more. Set it honestly. There is no wrong answer."},
+    {h:"Block structure",b:"The panel at the top shows your day's prescribed sequence. Each task is assigned to a block so you always know when it belongs in the day."},
+    {h:"Task chips",b:"Category (what kind of work), seed (what it builds toward), time (what you're committing to), XP (what you earn), block (when it happens). Committing to the time — not to finishing."},
+    {h:"Skip logic",b:"Habit tasks (Routine, Mind, Soul, Body): skip = lose the XP, no carry-forward. Never miss twice.\n\nClearing and seed tasks: skip = carries to next week automatically.\n\nLife tasks: carries once. Skip twice = moves to Parking Lot automatically."},
+    {h:"Three-dot menu",b:"Tap ••• on any task to edit, duplicate, move to Parking Lot, or delete. Edits to built-in tasks save as overrides — the original is always preserved."}
+  ]},
+  city:{title:"City tab",sections:[
+    {h:"How it works",b:"Every XP point builds the city. Districts light up as you level up. Level 1 = Ruins. Level 2 unlocks The Foundation (Seed 6). Level 3 unlocks The Market (GLEAN). Up to Level 10."},
+    {h:"District progress bars",b:"Each district card shows a progress bar based on the relevant task category this week. Foundation tracks Work tasks. Market tracks Business. Gallery tracks Creative."},
+    {h:"The long view",b:"The city is a reminder that each task is a brick. You don't see a building go up brick by brick — but look back after 12 weeks and the skyline will be different."}
+  ]},
+  boss:{title:"Boss tab",sections:[
+    {h:"The Chaos Boss (Week 4)",b:"Five defeat conditions, each worth 50 XP. Check them only when genuinely true — not aspirationally. The boss health bar depletes as you check. 0% = defeated."},
+    {h:"Defeat conditions",b:"Morning Anchor held all 4 weeks. 3+ zones cleared and holding. Digital systems active. GLEAN rebrand live. Seed 6 Case Study 1 complete. Each one is a real proof point."},
+    {h:"Upcoming bosses",b:"Week 8: The Inertia Boss — tests whether seeds are actually growing, not just planted.\nWeek 12: The Doubt Boss — the final confrontation."}
+  ]},
+  review:{title:"Review tab",sections:[
+    {h:"How to use it",b:"Score the week (how many days did the rhythm hold?). Name what moved per seed. Name the specific obstacle — not the feeling, the actual thing. Set one task per active seed for next week."},
+    {h:"Why it matters",b:"Without the weekly review, you're just completing tasks. The review connects each task to the larger 12-week arc and catches drift before it becomes derailment."},
+    {h:"Saving",b:"Tap Save to earn 30 XP and lock in the week. Reviews persist — you can read back through previous weeks to see patterns emerge."}
+  ]},
+  vision:{title:"Vision tab",sections:[
+    {h:"Guiding conception",b:"The single statement that explains why all six seeds exist. When a decision feels unclear, measure it against this. If it requires shrinking who you are to make it work, it doesn't belong."},
+    {h:"Guiding principle",b:"The operating constraint. Every project has to hold the full weight of the vision. Strategic commitment. No shrinking."},
+    {h:"The six seeds",b:"Each seed has a specific premise and a 9.5/10 rating. The ratings reflect how clearly defined and personally aligned each seed is — not how far along they are. They start as seeds. They become the city."}
+  ]},
+  parking:{title:"Parking Lot tab",sections:[
+    {h:"Someday Maybe",b:"Tasks skipped twice land here automatically. They are not deleted. They are waiting. Tap 'Move to next week' to bring any back into the active system."},
+    {h:"Ideas and future seeds",b:"Anything you want to capture but aren't ready to act on goes here. You can also move any task here manually from its three-dot menu. The Parking Lot is not failure — it's a trusted holding space."},
+    {h:"Adding ideas",b:"Use the input at the bottom to add any idea, future project, or task. Getting it out of your head and into the system is the goal."}
+  ]}
+};
+
+var FV_NOTES={
+  city:"This is your city. It starts as ruins. Every task you complete adds a brick. Districts light up as you level up.",
+  boss:"Boss fights test whether the foundation actually held. Check defeat conditions only when they're genuinely true.",
+  review:"The most important habit in the system. 30 minutes every Sunday. It earns 30 XP and it's worth more than that.",
+  vision:"Come here when you forget why you're doing this. Your guiding conception and all six seeds live here.",
+  parking:"Tasks skipped twice land here automatically. Ideas that aren't ready live here too. Not trash — a holding space."
+};
+
+// STATE FLAGS (added to S object at init)
+// S.onboardingDone  - bool
+// S.helpTab         - string (current help sheet tab)
+// S.helpOpen        - bool
+// S.wtStep          - int (walkthrough step)
+// S.fvSeen          - object (tab: bool)
+
+function initOnboardingState(){
+  if(!S.hasOwnProperty("onboardingDone")) S.onboardingDone=false;
+  if(!S.hasOwnProperty("helpOpen")) S.helpOpen=false;
+  if(!S.hasOwnProperty("helpTab")) S.helpTab="today";
+  if(!S.hasOwnProperty("wtStep")) S.wtStep=0;
+  if(!S.hasOwnProperty("fvSeen")) S.fvSeen={};
+}
+
+// ── WALKTHROUGH RENDERER ──
+function renderWalkthrough(app){
+  var step=S.wtStep;
+  var screen=WALKTHROUGH[step];
+  var div=document.createElement("div");div.className="wt-overlay";
+
+  // Progress pips
+  var prog=document.createElement("div");prog.className="wt-progress";
+  WALKTHROUGH.forEach(function(_,i){
+    var pip=document.createElement("div");
+    pip.className="wt-pip"+(i<step?" done":i===step?" active":"");
+    prog.appendChild(pip);
+  });
+  div.appendChild(prog);
+
+  // Body
+  var body=document.createElement("div");body.className="wt-body";
+  var icon=document.createElement("div");icon.className="wt-icon";
+  icon.style.color=screen.iconColor;icon.textContent=screen.icon;
+  var title=document.createElement("div");title.className="wt-title";title.textContent=screen.title;
+  var text=document.createElement("div");text.className="wt-text";text.textContent=screen.body;
+  body.appendChild(icon);body.appendChild(title);body.appendChild(text);
+  div.appendChild(body);
+
+  // Footer
+  var footer=document.createElement("div");footer.className="wt-footer";
+  var cta=document.createElement("button");cta.className="wt-cta";cta.textContent=screen.cta;
+  cta.onclick=function(){
+    if(step<WALKTHROUGH.length-1){
+      S.wtStep=step+1;save();render();
+    } else {
+      S.onboardingDone=true;S.wtStep=0;save();render();
+    }
+  };
+  footer.appendChild(cta);
+
+  if(step<WALKTHROUGH.length-1){
+    var skip=document.createElement("span");skip.className="wt-skip";skip.textContent="Skip walkthrough";
+    skip.onclick=function(){S.onboardingDone=true;S.wtStep=0;save();render();};
+    footer.appendChild(skip);
+  }
+  div.appendChild(footer);
+  app.appendChild(div);
+}
+
+// ── HELP BUTTON (injected into header) ──
+function injectHelpButton(hdrEl){
+  var btn=document.createElement("button");btn.className="help-btn";btn.textContent="?";
+  btn.title="Help";
+  btn.onclick=function(e){
+    e.stopPropagation();
+    S.helpOpen=true;
+    S.helpTab=S.view||"today";
+    save();render();
+  };
+  // Insert at the start of hdr-top
+  var hdrTop=hdrEl.querySelector(".hdr-top");
+  if(hdrTop) hdrTop.insertBefore(btn,hdrTop.firstChild);
+}
+
+// ── HELP SHEET RENDERER ──
+function renderHelpSheet(app){
+  var overlay=document.createElement("div");overlay.className="help-overlay";
+  overlay.onclick=function(e){if(e.target===overlay){S.helpOpen=false;save();render();}};
+
+  var sheet=document.createElement("div");sheet.className="help-sheet";
+
+  // Header
+  var hdr=document.createElement("div");hdr.className="help-sheet-hdr";
+  var titleEl=document.createElement("div");titleEl.className="help-sheet-title";
+  titleEl.textContent=(TAB_EXPLAINERS[S.helpTab]||{title:"Help"}).title;
+  var closeBtn=document.createElement("div");closeBtn.className="help-close";closeBtn.textContent="×";
+  closeBtn.onclick=function(){S.helpOpen=false;save();render();};
+  hdr.appendChild(titleEl);hdr.appendChild(closeBtn);
+  sheet.appendChild(hdr);
+
+  // Tab row
+  var tabRow=document.createElement("div");tabRow.className="help-tabs";
+  Object.keys(TAB_EXPLAINERS).forEach(function(key){
+    var tab=document.createElement("div");tab.className="help-tab"+(S.helpTab===key?" a":"");
+    tab.textContent=key.charAt(0).toUpperCase()+key.slice(1);
+    (function(k){tab.onclick=function(){
+      S.helpTab=k;
+      titleEl.textContent=(TAB_EXPLAINERS[k]||{title:"Help"}).title;
+      renderHelpBody(bodyEl,k);
+      tabRow.querySelectorAll(".help-tab").forEach(function(t){t.classList.remove("a");});
+      tab.classList.add("a");
+    };})(key);
+    tabRow.appendChild(tab);
+  });
+  sheet.appendChild(tabRow);
+
+  // Body
+  var bodyEl=document.createElement("div");bodyEl.className="help-body";
+  renderHelpBody(bodyEl,S.helpTab);
+  sheet.appendChild(bodyEl);
+
+  overlay.appendChild(sheet);
+  app.appendChild(overlay);
+}
+
+function renderHelpBody(bodyEl,key){
+  bodyEl.innerHTML="";
+  var data=TAB_EXPLAINERS[key];if(!data)return;
+  data.sections.forEach(function(sec){
+    var s=document.createElement("div");s.className="help-section";
+    var h=document.createElement("div");h.className="help-section-hdr";h.textContent=sec.h;
+    var b=document.createElement("div");b.className="help-section-body";b.textContent=sec.b;
+    s.appendChild(h);s.appendChild(b);bodyEl.appendChild(s);
+  });
+  // Replay walkthrough button
+  var replay=document.createElement("button");replay.className="help-replay";
+  replay.textContent="↺  Replay the walkthrough";
+  replay.onclick=function(){S.helpOpen=false;S.onboardingDone=false;S.wtStep=0;save();render();};
+  bodyEl.appendChild(replay);
+}
+
+// ── FIRST VISIT BANNER ──
+function renderFVBanner(app,tab){
+  if(S.fvSeen[tab]||!FV_NOTES[tab])return;
+  var div=document.createElement("div");div.className="fv-banner";
+  var txt=document.createElement("div");txt.className="fv-text";txt.textContent=FV_NOTES[tab];
+  var dismiss=document.createElement("div");dismiss.className="fv-dismiss";dismiss.textContent="×";
+  dismiss.onclick=function(){S.fvSeen[tab]=true;save();div.remove();};
+  div.appendChild(txt);div.appendChild(dismiss);
+  app.appendChild(div);
+}
+
 // INIT
 load();
+initOnboardingState();
 var t2=new Date().toDateString();
 var y2=new Date();y2.setDate(y2.getDate()-1);
 if(S.lastDate===y2.toDateString()){S.streak++;}
