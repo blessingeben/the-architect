@@ -613,7 +613,10 @@ var S={
   plannerOpen:true,
   expandedReviews:{},
   defaultEnergy:"Medium",
-  settingsMsg:null
+  settingsMsg:null,
+  showPhysicalVerify:false,
+  depsVersion:0,
+  depViolations:[]
 };
 
 function getLvl(){for(var i=LEVELS.length-1;i>=0;i--){if(S.xp>=LEVELS[i].xp)return LEVELS[i];}return LEVELS[0];}
@@ -850,6 +853,98 @@ function renderToday(app){
       dis.onclick=function(){S.setupDismissed=true;save();render();};sp.appendChild(dis);
     }
     app.appendChild(sp);
+  }
+
+  // Dependency consistency check — shows when saved state has out-of-order completions
+  if(S.showPhysicalVerify){
+    var violations=S.depViolations||[];
+    // Build human-readable list of violations
+    var allWeekTasks={};
+    ["0","1","2","3","4"].forEach(function(w){
+      (TASKS[w]||[]).forEach(function(t){allWeekTasks[t.id]=t.name;});
+    });
+    // Also add recurring names
+    var recNames={"rec_anchor":"Morning Anchor","rec_pages":"Morning Pages","rec_faith":"Faith moment","rec_close":"Evening Close","rec_move":"Movement"};
+
+    function getTaskName(id){
+      if(allWeekTasks[id]) return allWeekTasks[id];
+      var base=id.replace(/_w[0-9]+$/,"");
+      if(recNames[base]) return recNames[base];
+      return id;
+    }
+
+    var pvBanner=document.createElement("div");pvBanner.className="banner";
+    pvBanner.style.cssText="background:rgba(239,159,39,0.06);border-color:rgba(239,159,39,0.3);margin:10px 16px 0";
+
+    var pvTitle=document.createElement("div");pvTitle.className="banner-title";
+    pvTitle.style.color="#FAC775";
+    pvTitle.textContent="⚠ "+violations.length+" task"+(violations.length!==1?"s":"")+" marked done before "+(violations.length!==1?"their":"its")+" prerequisite";
+    pvBanner.appendChild(pvTitle);
+
+    var pvBody=document.createElement("div");pvBody.className="banner-body";
+    pvBody.style.marginBottom="8px";
+    pvBody.textContent="Focus Now now checks that earlier steps are genuinely done before recommending later ones. These tasks in your saved progress were completed out of order:";
+    pvBanner.appendChild(pvBody);
+
+    // Show up to 4 violations
+    var shown=violations.slice(0,4);
+    shown.forEach(function(v){
+      var vRow=document.createElement("div");
+      vRow.style.cssText="font-size:11px;color:var(--text3);padding:2px 0;line-height:1.4";
+      vRow.textContent="• “"+getTaskName(v.task)+"” needs “"+getTaskName(v.blocker)+"” done first";
+      pvBanner.appendChild(vRow);
+    });
+    if(violations.length>4){
+      var more=document.createElement("div");
+      more.style.cssText="font-size:11px;color:var(--text3);padding:2px 0;font-style:italic";
+      more.textContent="...and "+(violations.length-4)+" more";
+      pvBanner.appendChild(more);
+    }
+
+    var pvRow=document.createElement("div");pvRow.style.cssText="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap";
+
+    var pvDismiss=document.createElement("button");pvDismiss.className="e-btn sm";
+    pvDismiss.style.fontSize="11px";
+    pvDismiss.textContent="These are genuinely done — keep progress";
+    pvDismiss.onclick=function(){S.showPhysicalVerify=false;save();render();};
+
+    var pvReset=document.createElement("button");pvReset.className="e-btn sl";
+    pvReset.style.fontSize="11px";
+    pvReset.textContent="Reset affected tasks only";
+    pvReset.onclick=function(){
+      // Clear only the tasks that were done out of order (and their dependents)
+      var toReset=new Set();
+      (S.depViolations||[]).forEach(function(v){
+        toReset.add(v.task);
+        // Also clear tasks that depended on the violating task
+        Object.entries(TASK_DEPS).forEach(function(kv){
+          if(kv[1].includes(v.task)||kv[1].includes(v.task.replace(/_w[0-9]+$/,""))){
+            toReset.add(kv[0]);
+          }
+        });
+      });
+      toReset.forEach(function(id){
+        delete S.checked[id];
+        // Also clear week instances
+        ["0","1","2","3","4"].forEach(function(w){delete S.checked[id+"_w"+w];});
+      });
+      // Recalculate XP from remaining checked tasks
+      var xp=0;
+      Object.keys(S.checked).forEach(function(id){
+        if(S.checked[id]!=="done") return;
+        var allT=[];
+        ["0","1","2","3","4"].forEach(function(w){allT=allT.concat(TASKS[w]||[]);});
+        var t=allT.find(function(t){return t.id===id;});
+        if(t) xp+=(t.xp||(XM[t.cat]||10));
+      });
+      S.xp=xp;
+      S.showPhysicalVerify=false;
+      S.depViolations=[];
+      save();render();
+    };
+
+    pvRow.appendChild(pvDismiss);pvRow.appendChild(pvReset);pvBanner.appendChild(pvRow);
+    app.appendChild(pvBanner);
   }
 
   // Pre-Week guidance banner
@@ -1419,7 +1514,7 @@ function makeCard(task){
       return bt?bt.name.substring(0,45)+"\u2026":bid;
     });
     si.style.color="#FAC775";
-    si.textContent="\u23f3 Waiting for: "+blockNames.join(", ");
+    si.textContent="\u23f3 Needs done first: "+blockNames.join(", ")+" (physically, not just checked)";
   } else if(rule==="nc") si.textContent="Skip: no carry-forward. Never miss twice.";
   else if(rule==="c") si.textContent="Skip: carries to next week automatically.";
   else si.textContent="Skip: carries once. Twice \u2192 Parking Lot.";
@@ -2274,6 +2369,36 @@ var FV_NOTES={
 
 function initOnboardingState(){
   initTimeState();
+  // Version migration: validate ALL dependency relationships
+  // If any task is marked done but its blocker is not, the state is inconsistent
+  if(!S.hasOwnProperty("depsVersion")||S.depsVersion<2){
+    S.depsVersion=2;
+    if(S.xp>0){
+      // Scan all checked tasks — find any where a dependency is not done
+      var violations=[];
+      Object.keys(S.checked).forEach(function(taskId){
+        if(S.checked[taskId]!=="done") return;
+        // Get baseId for recurring tasks (rec_pages_w1 -> rec_pages)
+        var baseId=taskId.replace(/_w[0-9]+$/,"");
+        var blockers=TASK_DEPS[taskId]||TASK_DEPS[baseId]||[];
+        blockers.forEach(function(bid){
+          var blockerDone=S.checked[bid]==="done";
+          // Also check any week instance of recurring blocker
+          if(!blockerDone){
+            var weeks=["0","1","2","3","4"];
+            blockerDone=weeks.some(function(w){return S.checked[bid+"_w"+w]==="done";});
+          }
+          if(!blockerDone){
+            violations.push({task:taskId,blocker:bid});
+          }
+        });
+      });
+      if(violations.length>0){
+        S.showPhysicalVerify=true;
+        S.depViolations=violations;
+      }
+    }
+  }
   if(!S.hasOwnProperty("onboardingDone")) S.onboardingDone=false;
   if(!S.hasOwnProperty("helpOpen")) S.helpOpen=false;
   if(!S.hasOwnProperty("helpTab")) S.helpTab="today";
