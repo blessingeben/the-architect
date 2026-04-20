@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F0F14">
+<title>The Architect</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F0F14;--bg2:#1A1A24;--bg3:#242433;
+  --gold:#F5C842;--gold2:#E8A800;--goldbg:rgba(245,200,66,0.1);
+  --teal:#1D9E75;--tealbg:rgba(29,158,117,0.1);
+  --coral:#D85A30;--coralbg:rgba(216,90,48,0.1);
+  --amber:#EF9F27;--amberbg:rgba(239,159,39,0.1);
+  --purple:#7F77DD;--purplebg:rgba(127,119,221,0.1);
+  --red:#E24B4A;--redbg:rgba(226,75,74,0.1);
+  --blue:#378ADD;--bluebg:rgba(55,138,221,0.1);
+  --green:#639922;--greenbg:rgba(99,153,34,0.1);
+  --text:#F0EDE8;--text2:#A09890;--text3:#605850;
+  --border:rgba(240,237,232,0.08);--border2:rgba(240,237,232,0.15);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.5;max-width:430px;margin:0 auto;position:relative}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none}
+input,textarea,select{font-family:inherit}
+
+/* SCROLL CONTAINER */
+#scroll-area{position:absolute;top:0;left:0;right:0;bottom:60px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#scroll-area::-webkit-scrollbar{display:none}
+
+/* HEADER */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;position:sticky;top:0;z-index:40}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.hdr-title{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2)}
+.xp-row{display:flex;align-items:center;gap:6px}
+.xp-val{font-size:15px;font-weight:500;color:var(--gold)}
+.xp-lbl{font-size:10px;color:var(--text3);text-transform:uppercase}
+.lvl-badge{background:var(--gold2);color:#1A1200;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+.xp-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.xp-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 0.5s}
+.xp-sub{display:flex;justify-content:space-between;margin-top:3px}
+.xp-sub span{font-size:10px;color:var(--text3)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;height:60px;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding:6px 0 10px;z-index:50}
+.bn-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;padding:2px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bn-icon{font-size:14px;line-height:1.2}
+.bn-label{font-size:9px;color:var(--text3);letter-spacing:0.03em}
+.bn-label.a{color:var(--gold);font-weight:500}
+.bn-dot{width:4px;height:4px;border-radius:50%;background:transparent;margin-top:1px}
+.bn-dot.a{background:var(--gold)}
+
+/* STREAK */
+.streak-bar{display:flex;align-items:center;gap:8px;padding:6px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.streak-num{font-size:13px;font-weight:500;color:var(--amber)}
+.streak-lbl{font-size:11px;color:var(--text2)}
+.s-dots{display:flex;gap:3px;margin-left:auto}
+.s-dot{width:7px;height:7px;border-radius:50%;background:var(--bg3)}
+.s-dot.l{background:var(--amber)}
+
+/* ENERGY */
+.energy-row{display:flex;gap:5px;padding:7px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.e-btn{flex:1;padding:6px 3px;border-radius:7px;font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--bg3);color:var(--text2);text-align:center;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.e-btn.sl{background:var(--redbg);border-color:var(--red);color:#F09595}
+.e-btn.sm{background:var(--amberbg);border-color:var(--amber);color:#FAC775}
+.e-btn.sh{background:var(--tealbg);border-color:var(--teal);color:#5DCAA5}
+
+/* WEEK SELECTOR */
+.wsel{display:flex;align-items:center;gap:5px;padding:6px 16px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.wsel::-webkit-scrollbar{display:none}
+.wsel-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;flex-shrink:0}
+.wpill{padding:4px 10px;border-radius:6px;font-size:11px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);flex-shrink:0;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.wpill.a{background:var(--gold);color:#1A1200;font-weight:600;border-color:var(--gold)}
+
+/* DAY ROW */
+.day-row{display:flex;gap:4px;padding:7px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.day-pill{flex:1;padding:5px 2px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);display:flex;flex-direction:column;align-items:center;gap:2px}
+.day-pill.td{border-color:var(--gold);background:var(--goldbg)}
+.day-pill.dn{border-color:var(--teal);background:var(--tealbg)}
+.dp-n{font-size:9px;font-weight:600;color:var(--text3)}
+.day-pill.td .dp-n{color:var(--gold)}
+.day-pill.dn .dp-n{color:var(--teal)}
+.dp-d{width:4px;height:4px;border-radius:50%;background:transparent}
+.day-pill.td .dp-d{background:var(--gold)}
+.day-pill.dn .dp-d{background:var(--teal)}
+
+/* PROGRESS */
+.prog-row{display:flex;align-items:center;gap:10px;padding:6px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.prog-track{flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--teal);border-radius:2px;transition:width 0.4s}
+.prog-num{font-size:11px;color:var(--text2);white-space:nowrap}
+
+/* PLANNER */
+.planner-wrap{margin:10px 16px 0}
+.planner-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.planner-title{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
+.planner-total{font-size:10px;color:var(--text3)}
+.planner-toggle{font-size:10px;color:var(--blue);cursor:pointer;padding:2px 6px}
+.planner-blocks{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.planner-block{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.planner-block:last-child{border-bottom:none}
+.pb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.pb-info{flex:1;min-width:0}
+.pb-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px}
+.pb-tasks{font-size:10px;color:var(--text3);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.pb-time{font-size:10px;color:var(--text3);white-space:nowrap}
+.pb-type{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;white-space:nowrap}
+
+/* NOTIFICATION SETUP */
+.setup-prompt{margin:10px 16px 0;background:var(--bg2);border:1px solid rgba(55,138,221,0.35);border-radius:10px;padding:12px 14px}
+.sp-title{font-size:12px;font-weight:500;color:#85B7EB;margin-bottom:4px}
+.sp-body{font-size:11px;color:var(--text2);line-height:1.55;margin-bottom:10px}
+.sp-steps{display:flex;flex-direction:column;gap:6px}
+.sp-step{display:flex;align-items:flex-start;gap:8px;background:var(--bg3);border-radius:8px;padding:8px 10px}
+.sp-step-num{width:18px;height:18px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.sp-step-body{flex:1;min-width:0}
+.sp-step-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px}
+.sp-step-desc{font-size:10px;color:var(--text3);line-height:1.4}
+.sp-check{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;transition:all 0.15s;margin-top:1px;-webkit-tap-highlight-color:transparent}
+.sp-check.done{background:var(--teal);border-color:var(--teal)}
+.sp-dismiss{font-size:10px;color:var(--text3);cursor:pointer;margin-top:8px;display:block;text-align:right}
+
+/* SECTION LABELS */
+.sec-label{padding:9px 16px 3px;font-size:9px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:6px}
+.sec-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+/* TASKS */
+.task-item{background:var(--bg2);border-bottom:1px solid var(--border);padding:9px 14px;display:flex;align-items:flex-start;gap:9px;position:relative}
+.task-item.comp{opacity:0.4}
+.task-item.skip-state{opacity:0.35}
+.task-item.carried{border-left:2px solid var(--amber)}
+.chk{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border2);background:transparent;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;transition:all 0.15s;margin-top:1px;-webkit-tap-highlight-color:transparent}
+.chk.done{background:var(--teal);border-color:var(--teal)}
+.chk.sk{background:var(--coral);border-color:var(--coral)}
+.task-body{flex:1;min-width:0}
+.task-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:3px}
+.task-item.comp .task-name{text-decoration:line-through;color:var(--text3)}
+.task-item.skip-state .task-name{text-decoration:line-through;color:var(--text3)}
+.chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px}
+.chip{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.c-time{font-size:10px;font-weight:500;color:var(--gold);background:var(--goldbg);padding:2px 6px;border-radius:20px;border:1px solid rgba(245,200,66,0.2);white-space:nowrap}
+.c-xp{font-size:10px;color:var(--amber);font-weight:500;white-space:nowrap}
+.c-seed{font-size:9px;color:var(--purple);font-weight:700;background:var(--purplebg);padding:2px 6px;border-radius:20px;border:1px solid rgba(127,119,221,0.25);text-transform:uppercase;white-space:nowrap}
+.c-block{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;white-space:nowrap}
+.c-quick{font-size:9px;color:var(--teal);font-weight:700;background:var(--tealbg);padding:2px 6px;border-radius:20px;border:1px solid rgba(29,158,117,0.25);text-transform:uppercase}
+.c-carry{font-size:9px;color:#FAC775;font-weight:700;background:var(--amberbg);padding:2px 6px;border-radius:20px;border:1px solid rgba(239,159,39,0.3);text-transform:uppercase}
+.task-action{font-size:11px;color:var(--text2);line-height:1.55;font-style:italic;margin-top:1px}
+.skip-info{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.4}
+.skip-btn{font-size:10px;color:var(--text3);cursor:pointer;padding:2px 0;margin-top:3px;display:inline-block;-webkit-tap-highlight-color:transparent}
+.tdots{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;flex-shrink:0;color:var(--text3);font-size:14px;letter-spacing:2px;transition:background 0.15s;-webkit-tap-highlight-color:transparent}
+.tdots:hover,.tdots:active{background:var(--bg3)}
+
+/* TASK MENU */
+.task-menu{position:absolute;right:14px;top:34px;background:#1E1E2E;border:1px solid var(--border2);border-radius:10px;z-index:200;overflow:hidden;min-width:150px;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+.mi{display:flex;align-items:center;gap:9px;padding:11px 14px;font-size:13px;color:var(--text);cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--border);-webkit-tap-highlight-color:transparent}
+.mi:last-child{border-bottom:none}
+.mi:active{background:var(--bg3)}
+.mi.danger{color:#F09595}
+.mi-icon{font-size:13px;width:16px;text-align:center}
+
+/* ADD ROW */
+.add-row{display:flex;align-items:center;gap:7px;padding:9px 16px;background:var(--bg2);border-top:1px solid var(--border)}
+.add-inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text)}
+.add-inp::placeholder{color:var(--text3);font-style:italic}
+.add-inp:focus{outline:none;border-color:var(--gold)}
+.add-btn{padding:7px 13px;background:var(--gold2);color:#1A1200;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+
+/* BANNERS */
+.banner{margin:10px 16px 0;border-radius:9px;padding:9px 13px;border:1px solid}
+.banner-title{font-size:11px;font-weight:500;margin-bottom:2px}
+.banner-body{font-size:11px;color:var(--text2);line-height:1.5}
+.carry-note{background:var(--amberbg);border:1px solid rgba(239,159,39,0.25);border-radius:8px;padding:8px 13px;margin:8px 16px 0;font-size:11px;color:#FAC775;line-height:1.4}
+.day-win{margin:12px 16px;background:var(--tealbg);border:1px solid rgba(29,158,117,0.3);border-radius:11px;padding:14px;text-align:center}
+.dw-title{font-size:14px;font-weight:500;color:var(--teal);margin-bottom:3px}
+.dw-sub{font-size:11px;color:var(--text2)}
+
+/* CITY */
+.city-wrap{padding:14px 16px}
+.city-svg-box{width:100%;border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:12px;background:var(--bg3)}
+.city-svg-box svg{width:100%;display:block}
+.city-phase{font-size:11px;color:var(--text3);text-align:center;margin-bottom:12px;line-height:1.5}
+.district-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.d-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 12px}
+.d-card.ul{border-color:var(--border2)}
+.d-card.lk{opacity:0.35}
+.d-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.d-seed{font-size:10px;color:var(--text3);margin-bottom:6px}
+.d-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.d-fill{height:100%;border-radius:2px;transition:width 0.4s}
+
+/* REVIEW */
+.review-screen{padding:14px 16px}
+.r-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.r-hdr{padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(245,200,66,0.04)}
+.r-hdr-title{font-size:13px;font-weight:500;color:var(--text)}
+.r-hdr-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.r-q{padding:10px 14px;border-bottom:1px solid var(--border)}
+.r-q:last-child{border-bottom:none}
+.r-q-lbl{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.r-ta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);resize:none;min-height:58px;line-height:1.5}
+.r-ta:focus{outline:none;border-color:var(--gold)}
+.score-row{display:flex;gap:5px;flex-wrap:wrap}
+.score-btn{padding:5px 10px;border-radius:6px;font-size:11px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.score-btn.sel{background:var(--gold);border-color:var(--gold);color:#1A1200;font-weight:600}
+.r-save-btn{width:100%;padding:12px;background:var(--gold);color:#1A1200;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;-webkit-tap-highlight-color:transparent}
+.r-saved{width:100%;padding:12px;background:var(--tealbg);color:var(--teal);border:1px solid rgba(29,158,117,0.3);border-radius:9px;font-size:13px;font-weight:500;text-align:center;margin-top:10px}
+
+/* VISION */
+.vision-screen{padding:14px 16px}
+.v-gc{background:var(--bg2);border:1px solid rgba(127,119,221,0.35);border-radius:12px;padding:14px;margin-bottom:10px}
+.v-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--purple);margin-bottom:6px}
+.v-txt{font-size:13px;color:var(--text);line-height:1.7}
+.v-gp{background:var(--bg2);border:1px solid rgba(29,158,117,0.35);border-radius:12px;padding:14px;margin-bottom:10px}
+.v-gp .v-lbl{color:var(--teal)}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.s-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.s-num{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3)}
+.s-score{font-size:9px;color:var(--gold);font-weight:500}
+.s-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.s-desc{font-size:11px;color:var(--text2);line-height:1.6;font-style:italic}
+
+/* BOSS */
+.boss-screen{padding:14px 16px}
+.boss-card{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:10px;text-align:center}
+.boss-name{font-size:16px;font-weight:500;color:var(--text);margin-bottom:4px}
+.boss-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.boss-health{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.boss-hp{height:100%;background:var(--red);border-radius:4px;transition:width 0.5s}
+.boss-hp-lbl{font-size:10px;color:var(--text3);text-align:right;margin-bottom:14px}
+.boss-tasks{text-align:left}
+.bt{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-top:1px solid var(--border)}
+.bt-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;color:#fff;margin-top:1px;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.bt-chk.done{background:var(--teal);border-color:var(--teal)}
+.bt-txt{font-size:12px;color:var(--text);line-height:1.45}
+.bt-xp{font-size:10px;color:var(--amber);margin-top:2px}
+
+/* PARKING */
+.parking-screen{padding:14px 16px}
+.p-section-title{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.p-dot{width:5px;height:5px;border-radius:50%}
+.p-item{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:6px}
+.p-name{font-size:13px;color:var(--text);margin-bottom:2px}
+.p-meta{font-size:10px;color:var(--text3)}
+.p-move{font-size:10px;color:var(--blue);cursor:pointer;margin-top:4px;display:inline-block;-webkit-tap-highlight-color:transparent}
+.p-add-row{display:flex;gap:7px;margin-top:8px}
+.p-inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text)}
+.p-inp::placeholder{color:var(--text3);font-style:italic}
+.p-inp:focus{outline:none;border-color:var(--blue)}
+.p-btn{padding:7px 12px;background:var(--blue);color:#fff;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;padding:16px;z-index:300;max-width:430px;margin:0 auto}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:18px;width:100%;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:14px}
+.m-lbl{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;margin-top:10px}
+.m-inp{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);resize:none;line-height:1.5}
+.m-inp:focus{outline:none;border-color:var(--gold)}
+.m-sel{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text)}
+.m-row{display:flex;gap:8px;margin-top:14px}
+.m-btn{flex:1;padding:11px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.m-btn.save{background:var(--gold);color:#1A1200;border:none}
+.m-btn.cancel{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+
+/* LEVEL UP */
+.lu-wrap{background:var(--bg2);border:1px solid var(--gold);border-radius:14px;margin:16px;padding:22px;text-align:center}
+.lu-lvl{font-size:22px;font-weight:500;color:var(--gold);margin-bottom:5px}
+.lu-sub{font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.lu-unlock{background:var(--goldbg);border:1px solid rgba(245,200,66,0.25);border-radius:8px;padding:9px;margin-bottom:14px;font-size:12px;color:var(--gold);line-height:1.5}
+.lu-btn{background:var(--gold);color:#1A1200;border:none;border-radius:9px;padding:11px 24px;font-size:13px;font-weight:600;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent}
+
+/* SPACER at bottom of scroll */
+.scroll-spacer{height:20px}
+</style>
+</head>
+<body>
+<div id="scroll-area">
+  <div id="app"></div>
+  <div class="scroll-spacer"></div>
+</div>
+<nav class="bottom-nav" id="bottom-nav"></nav>
+
+<script>
+var DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+var CATS=["Physical Clearing","Digital Clearing","Paper Clearing","Zone Setup","App Setup","Paper Setup","Life","Routine","Mind","Body","Soul","Work","Creative","Business","Community","Planning","Custom"];
+var CS={
+  "Physical Clearing":{bg:"rgba(245,200,66,0.12)",t:"#E8A800"},
+  "Digital Clearing":{bg:"rgba(55,138,221,0.12)",t:"#85B7EB"},
+  "Paper Clearing":{bg:"rgba(212,83,126,0.12)",t:"#ED93B1"},
+  "Zone Setup":{bg:"rgba(29,158,117,0.12)",t:"#5DCAA5"},
+  "App Setup":{bg:"rgba(127,119,221,0.12)",t:"#AFA9EC"},
+  "Paper Setup":{bg:"rgba(216,90,48,0.12)",t:"#F0997B"},
+  "Life":{bg:"rgba(99,153,34,0.12)",t:"#97C459"},
+  "Routine":{bg:"rgba(239,159,39,0.12)",t:"#FAC775"},
+  "Mind":{bg:"rgba(212,83,126,0.12)",t:"#ED93B1"},
+  "Body":{bg:"rgba(226,75,74,0.12)",t:"#F09595"},
+  "Soul":{bg:"rgba(29,158,117,0.12)",t:"#5DCAA5"},
+  "Work":{bg:"rgba(55,138,221,0.12)",t:"#85B7EB"},
+  "Creative":{bg:"rgba(127,119,221,0.12)",t:"#AFA9EC"},
+  "Business":{bg:"rgba(216,90,48,0.12)",t:"#F0997B"},
+  "Community":{bg:"rgba(99,153,34,0.12)",t:"#97C459"},
+  "Planning":{bg:"rgba(55,138,221,0.12)",t:"#85B7EB"},
+  "Custom":{bg:"rgba(160,152,144,0.12)",t:"#A09890"}
+};
+var XM={
+  "Physical Clearing":30,"Digital Clearing":25,"Paper Clearing":25,
+  "Zone Setup":30,"App Setup":25,"Paper Setup":25,"Life":15,
+  "Routine":10,"Mind":10,"Body":10,"Soul":10,"Work":20,
+  "Creative":15,"Business":20,"Community":25,"Planning":10,"Custom":10
+};
+var SR={
+  "Routine":"nc","Mind":"nc","Soul":"nc","Body":"nc",
+  "Physical Clearing":"c","Digital Clearing":"c","Paper Clearing":"c",
+  "Zone Setup":"c","App Setup":"c","Paper Setup":"c",
+  "Life":"co","Work":"c","Creative":"c","Business":"c",
+  "Community":"co","Planning":"co","Custom":"c"
+};
+var LEVELS=[
+  {lvl:1,xp:0,name:"Ruins",unlock:"The Clearing begins. You are finishing the move-in you never completed."},
+  {lvl:2,xp:200,name:"Foundation",unlock:"District 1 unlocked — The Foundation (Seed 6)"},
+  {lvl:3,xp:500,name:"Framework",unlock:"District 2 unlocked — The Market (GLEAN)"},
+  {lvl:4,xp:900,name:"Structure",unlock:"Boss 1 checkpoint — The Chaos Boss awaits at Week 4"},
+  {lvl:5,xp:1400,name:"Rising",unlock:"District 3 unlocked — The Gallery (A Big Deal)"},
+  {lvl:6,xp:2000,name:"Building",unlock:"District 4 unlocked — The Commons (Third Space)"},
+  {lvl:7,xp:2800,name:"Flourishing",unlock:"District 5 unlocked — The Workshop"},
+  {lvl:8,xp:3800,name:"Established",unlock:"Boss 2 checkpoint — The Inertia Boss awaits"},
+  {lvl:9,xp:5000,name:"Thriving",unlock:"District 6 visible — The Academy"},
+  {lvl:10,xp:6500,name:"The Architect",unlock:"The city is yours. The ceiling has been removed."}
+];
+var DAY_BLOCKS=[
+  {name:"Morning anchor",type:"deep",time:"45 min",color:"#7F77DD",tbg:"rgba(127,119,221,0.12)",tt:"#AFA9EC",taskCats:["Routine","Mind","Soul"],hint:"Morning Anchor + Pages + Faith"},
+  {name:"Rest",type:"rest",time:"20-30 min",color:"#605850",tbg:"rgba(96,88,80,0.12)",tt:"#A09890",taskCats:[],hint:"No screen. Water. Nap if needed."},
+  {name:"Deep work",type:"deep",time:"45-60 min",color:"#7F77DD",tbg:"rgba(127,119,221,0.12)",tt:"#AFA9EC",taskCats:["Work","Creative","Business"],hint:"One seed task. Decided last night."},
+  {name:"Rest or life",type:"rest",time:"30-45 min",color:"#605850",tbg:"rgba(96,88,80,0.12)",tt:"#A09890",taskCats:["Life","Body"],hint:"Eat. Life tasks. Movement. Nap."},
+  {name:"Shallow work",type:"shallow",time:"25-30 min",color:"#1D9E75",tbg:"rgba(29,158,117,0.12)",tt:"#5DCAA5",taskCats:["Physical Clearing","Digital Clearing","Paper Clearing","Zone Setup","App Setup","Paper Setup","Planning","Community"],hint:"Quick wins + clearing + capture"},
+  {name:"Rest",type:"rest",time:"20 min",color:"#605850",tbg:"rgba(96,88,80,0.12)",tt:"#A09890",taskCats:[],hint:"Recovery before evening."},
+  {name:"Evening close",type:"shallow",time:"20-30 min",color:"#1D9E75",tbg:"rgba(29,158,117,0.12)",tt:"#5DCAA5",taskCats:["Routine"],hint:"Evening Close + planner prep"}
+];
+var SETUP_STEPS=[
+  {id:"s1",title:"Move Routinery notification",desc:"Open Routinery > Morning Anchor > tap the bell icon. Set trigger to your wake time. This fires before Instagram."},
+  {id:"s2",title:"Set Hey Siri for Quick Capture",desc:"Settings > Siri > Listen for Hey Siri. Test: 'Hey Siri add to my Inbox reminders list'. Confirm it lands."},
+  {id:"s3",title:"Enable Weekly Review calendar alert",desc:"Apple Calendar > Seeds > Weekly Review event. Add a 30-minute alert. Cannot be skipped."},
+  {id:"s4",title:"Set seed block alerts in Calendar",desc:"Open Seed Block A and B events. Add a 5-minute alert to each. These cue you to begin."},
+  {id:"s5",title:"Add Evening Close reminder",desc:"Routinery > Evening Close > bell icon. Set 30 min before sleep. When it fires, everything else stops."}
+];
+var SEEDS=[
+  {num:"1",title:"A Big Deal / Une Grosse Affaire",desc:"A one-day self-produced collaborative art show presenting seven original multi-medium works unified by a recurring visual motif of a path. Sophisticated in atmosphere. Uncompromising in content. The viewer is never told what to think, only placed somewhere they can't leave unchanged.",score:"9.5/10",color:"#1D9E75"},
+  {num:"2",title:"GLEAN",desc:"A brand that reclaims what gets overlooked, in the people it platforms, the communities it invests in, and the person wearing it. Regal and refined by design. What gleams is never just what you're wearing.",score:"9.5/10",color:"#EF9F27"},
+  {num:"3",title:"The Third Space",desc:"A recurring community experience series built around the premise that some knowledge only transfers in a room, between people, through participation. The room is the thing you can't replicate anywhere else.",score:"9.5/10",color:"#D4537E"},
+  {num:"4",title:"Conversation Products",desc:"The physical manifestation of the third space — personal artifacts that carry knowledge and depth. Where the third space opens the room, these products keep it open.",score:"9.5/10",color:"#D85A30"},
+  {num:"5",title:"Personalized Curriculum",desc:"A long horizon educational framework built on the premise that a student's aspirations are the curriculum, not the ceiling. The student was never the problem. The starting point was.",score:"9.5/10",color:"#378ADD"},
+  {num:"6",title:"Strategic Consulting",desc:"A professional practice built on seeing what organizations cannot. The work doesn't just solve the problem in front of you. It removes the ceiling above it.",score:"9.5/10",color:"#7F77DD"}
+];
+var BOSS_TASKS=[
+  {id:"b1",text:"Morning Anchor held all 4 weeks without missing twice in a row",xp:50},
+  {id:"b2",text:"At least 3 physical zones cleared and still holding by Week 4",xp:50},
+  {id:"b3",text:"Digital systems set up and actively in use — Reminders, Notes, Calendar, home screen",xp:50},
+  {id:"b4",text:"GLEAN rebrand live with cause partner contacted",xp:50},
+  {id:"b5",text:"Seed 6 Case Study 1 complete — all 4 sections written",xp:50}
+];
+var TASKS={
+"0":[
+  {id:"p01",cat:"Zone Setup",seed:"Apartment",name:"Walk every room — write its one job",action:"Stand in each room 60 sec. Bedroom: sleep + morning anchor. Living room: rest + creative. Kitchen: food. Bathroom: body care. Write in Notes > Seeds > Master Log.",time:"10 min",depth:"shallow",quick:true,mvd:true},
+  {id:"p02",cat:"Zone Setup",seed:"Bedroom",name:"Designate and clear your morning anchor spot",action:"Pick your morning spot. Clear 3-foot radius. Surface holds only: water glass + Morning Pages notebook. Phone charger outside room tonight.",time:"20 min",depth:"shallow",mvd:true},
+  {id:"p03",cat:"Physical Clearing",seed:"Bedroom",name:"Move phone charger outside the bedroom right now",action:"Unplug and plug in outside. Hallway, living room, anywhere that requires leaving the room. Physical barrier, not willpower.",time:"2 min",depth:"shallow",quick:true,mvd:true},
+  {id:"p04",cat:"Physical Clearing",seed:"Apartment",name:"Set up 4 sorting bins for the whole apartment",action:"4 bags or boxes: Keep-This-Room, Relocate, Donate, Trash. Place in hallway. Every clearing session uses these 4 categories only.",time:"10 min",depth:"shallow",quick:true,mvd:true},
+  {id:"p05",cat:"Paper Setup",seed:"Planner",name:"Commit to one planner — put all others away",action:"Pick your main planner. All others in a box out of sight. Write today's date. One planner, one system.",time:"10 min",depth:"shallow",quick:true,mvd:true},
+  {id:"p06",cat:"Paper Setup",seed:"Morning Pages",name:"Place Morning Pages notebook at anchor spot",action:"Find your dedicated notebook. Place at anchor spot with pen. Write name and start date inside cover. Never leaves the anchor spot.",time:"5 min",depth:"shallow",quick:true,mvd:true},
+  {id:"p07",cat:"Life",seed:"Daily life",name:"Brain dump all life maintenance tasks to Reminders",action:"20 min timer. Every category: daily care, weekly errands, monthly obligations. Every item to Reminders Inbox. Do not process yet.",time:"20 min",depth:"shallow",mvd:true},
+  {id:"p08",cat:"Life",seed:"Weekly rhythm",name:"Build your weekly life schedule in Apple Notes",action:"Notes > Seeds > My Weekly Life Schedule. One line per day: Mon groceries, Tue laundry, Wed errands, Thu health, Fri admin, Sat foundation, Sun rest + review.",time:"20 min",depth:"shallow"},
+  {id:"p09",cat:"Life",seed:"Monthly rhythm",name:"Create monthly life checklist and set first reminder",action:"Notes > Seeds > Monthly Life Checklist. Car, health appointments, bills, meds. Set Reminders repeat on the 1st of each month.",time:"15 min",depth:"shallow",quick:true},
+  {id:"p10",cat:"App Setup",seed:"Routinery",name:"Download Routinery and build Morning Anchor routine",action:"App Store > Routinery. Create Morning Anchor: Phone stays down 1 min, Movement 5 min, Stillness 3 min, Phone unlocked. Daily trigger at wake time. Home screen next to alarm.",time:"20 min",depth:"shallow"},
+  {id:"p11",cat:"App Setup",seed:"Routinery",name:"Build Evening Close routine in Routinery",action:"Routinery > plus > Evening Close: Process Inbox 10 min, Tomorrow's one task 5 min, Calendar check 3 min, Phone outside bedroom. Trigger 30 min before sleep.",time:"15 min",depth:"shallow"},
+  {id:"p12",cat:"Digital Clearing",seed:"Apple Notes",name:"Archive all old notes into Archive 2024 folder",action:"Notes > New Folder > Archive 2024. Move every existing note into it. Do not delete. New Seeds structure goes on a clean slate.",time:"20 min",depth:"shallow"},
+  {id:"p13",cat:"App Setup",seed:"Apple Notes",name:"Build Seeds folder structure in Apple Notes",action:"Notes > New Folder > Seeds. Inside: Seed 6 Strategic Consulting, Seed 2 GLEAN, Seed 1 A Big Deal, Future Seeds. In each: Master Log (pin) + Week Plan. In Seeds: Weekly Review Template + GTD Reference.",time:"20 min",depth:"shallow"},
+  {id:"p14",cat:"Digital Clearing",seed:"Apple Reminders",name:"Clear old Reminders — mark everything complete",action:"Mark everything complete or move to Old Tasks list. Active view must be empty before the new 5-list structure.",time:"15 min",depth:"shallow"},
+  {id:"p15",cat:"App Setup",seed:"Apple Reminders",name:"Create 5 GTD lists and test Siri capture",action:"Create: Inbox (red), Next Actions (blue), Waiting For (orange), Someday Maybe (gray), Reference (green). Pin to dock. Settings > Siri > Listen for Hey Siri. Test: Hey Siri add to my Inbox reminders list.",time:"15 min",depth:"shallow"},
+  {id:"p16",cat:"Digital Clearing",seed:"Apple Calendar",name:"Clear old calendar clutter and sync Google",action:"Delete inactive recurring events. Remove unused calendars. Settings > Calendar > Accounts > Add Google. Enable sync.",time:"15 min",depth:"shallow",quick:true},
+  {id:"p17",cat:"App Setup",seed:"Apple Calendar",name:"Create Seeds calendar and add all recurring blocks",action:"Calendar > Add Calendar > Seeds (purple). Seed Block A 60 min daily weekdays, Seed Block B 60 min weekends, Weekly Review 45 min Sundays with 30 min alert, Capture Block 10 min daily.",time:"20 min",depth:"shallow"},
+  {id:"p18",cat:"Digital Clearing",seed:"Email",name:"Inventory all email accounts — list every active address",action:"Notes > Seeds > Email Inventory. List every email address: active or inactive, which app, roughly how full. You cannot manage 3+ accounts without this map.",time:"15 min",depth:"shallow",quick:true},
+  {id:"p19",cat:"Digital Clearing",seed:"Email",name:"Unsubscribe from 20 newsletters and promotional senders",action:"Open most cluttered email. 20 min timer. Find newsletters and promotions you no longer read. Use the unsubscribe link at the bottom — not just delete. Stops the daily bleed.",time:"20 min",depth:"shallow"},
+  {id:"p20",cat:"Digital Clearing",seed:"Photos",name:"Stop the photo bleed — turn off social app auto-save",action:"Settings > Privacy > Photos. For every social app: change permission to None or Selected. Then disable auto-save inside each app. Stops hundreds of duplicates per week.",time:"5 min",depth:"shallow",quick:true},
+  {id:"p21",cat:"Digital Clearing",seed:"iPhone",name:"Reorganize home screen — system apps front, distractions buried",action:"Page 1: Routinery, Reminders, Notes, Calendar, Messages, Phone, Camera, alarm only. Everything else moves to page 2. Social media into a folder called Later on page 2.",time:"20 min",depth:"shallow"},
+  {id:"p22",cat:"Digital Clearing",seed:"iPhone",name:"Delete 20 unused apps from iPhone",action:"Settings > General > iPhone Storage > sort by last used. Delete 20 apps not opened in 30+ days.",time:"15 min",depth:"shallow"},
+  {id:"p23",cat:"Physical Clearing",seed:"Bedroom",name:"All clothes off bedroom floor — sorted into 4 bins",action:"25 min timer. Every item: keep (wardrobe), relocate, donate, trash. Sorted piles only — do not fold yet.",time:"25 min",depth:"shallow"},
+  {id:"p24",cat:"Physical Clearing",seed:"Bedroom",name:"Sort beauty and skincare — keep, duplicate, or expired",action:"Gather every product. Keep: use regularly. Duplicate or unopened: decide. Expired or abandoned: trash. One sweep.",time:"20 min",depth:"shallow"}
+],
+"1":[
+  {id:"w1_01",cat:"Routine",seed:"System",name:"Morning Anchor in Routinery",action:"Routinery > Morning Anchor. Follow each step. No other app until Phone unlocked. Low mobility: seated counts.",time:"20 min",depth:"deep",mvd:true},
+  {id:"w1_02",cat:"Mind",seed:"System",name:"Morning Pages: 3 pages",action:"Notebook at anchor spot. 25 min timer. Write continuously. No editing, no rereading.",time:"25 min",depth:"deep",mvd:true},
+  {id:"w1_03",cat:"Soul",seed:"System",name:"Faith moment: one passage, quiet",action:"Bible app or Enduring Word. One passage. 5-10 min quiet. Same anchor time every day.",time:"10 min",depth:"shallow",mvd:true},
+  {id:"w1_04",cat:"Physical Clearing",seed:"Bedroom",name:"Hang or fold all clean clothes from sorting pile",action:"25 min timer. Every clean item properly into wardrobe. If wardrobe is full, something leaves before something goes in.",time:"25 min",depth:"shallow"},
+  {id:"w1_05",cat:"Physical Clearing",seed:"Bedroom",name:"Clear nightstand to morning anchor spec only",action:"Remove everything. Return only: water glass, Morning Pages notebook, pen.",time:"10 min",depth:"shallow",quick:true,mvd:true},
+  {id:"w1_06",cat:"Paper Setup",seed:"Planner",name:"Set up this week's planner layout",action:"Open planner to this week. Write dates. Block Morning Anchor daily, seed blocks from Calendar, Weekly Review Sunday.",time:"10 min",depth:"shallow",quick:true,mvd:true},
+  {id:"w1_07",cat:"Digital Clearing",seed:"Email",name:"Create a simple folder structure in your primary email",action:"5 folders only: Seeds, Health, Finance, People, Archive. Every email is deleted, unsubscribed, or filed in one of these 5. No other folders.",time:"15 min",depth:"shallow"},
+  {id:"w1_08",cat:"Digital Clearing",seed:"Photos",name:"Delete all screenshots and obvious duplicates",action:"Photos > Albums > Screenshots > select all > delete. Then Albums > Duplicates > merge or delete all. Typically removes 500-2000 photos without a single real decision.",time:"30 min",depth:"shallow"},
+  {id:"w1_09",cat:"Work",seed:"Seed 6",name:"List 5 specific outcomes from current role",action:"Notes > Seed 6 > Master Log. 5 specific things you have done that solved a problem or closed a gap. Raw list.",time:"25 min",depth:"deep"},
+  {id:"w1_10",cat:"Business",seed:"Seed 2",name:"Audit GLEAN store: keep, cut, or update per product",action:"Shopify. Each product: keep, cut, or update. Decisions in Notes > Seed 2 > Master Log. No changes yet.",time:"25 min",depth:"deep"},
+  {id:"w1_11",cat:"Life",seed:"Weekly rhythm",name:"This week's grocery and meal plan",action:"Notes > My Weekly Life Schedule. Write 3-4 simple meals. One grocery list. Order delivery or schedule the run.",time:"15 min",depth:"shallow",quick:true},
+  {id:"w1_12",cat:"Life",seed:"Health",name:"Schedule one outstanding medical or health appointment",action:"Monthly Life Checklist. Pick one deferred appointment. Open your phone and book it now.",time:"5 min",depth:"shallow",quick:true},
+  {id:"w1_13",cat:"Body",seed:"System",name:"Movement: 15 min any form",action:"Walk, stretch, anything. Low mobility: seated fully counts.",time:"15 min",depth:"shallow"},
+  {id:"w1_14",cat:"Routine",seed:"System",name:"Evening Close in Routinery",action:"Routinery > Evening Close. Inbox to zero. Tomorrow's one task per seed in Notes and planner. Phone outside bedroom.",time:"20 min",depth:"shallow",mvd:true}
+],
+"2":[
+  {id:"w2_01",cat:"Routine",seed:"System",name:"Morning Anchor",action:"Routinery > Morning Anchor. Full sequence. Week 2.",time:"20 min",depth:"deep",mvd:true},
+  {id:"w2_02",cat:"Mind",seed:"System",name:"Morning Pages",action:"25 min timer. 3 pages. No rereading.",time:"25 min",depth:"deep",mvd:true},
+  {id:"w2_03",cat:"Soul",seed:"System",name:"Faith moment",action:"One passage. 5-10 min quiet.",time:"10 min",depth:"shallow",mvd:true},
+  {id:"w2_04",cat:"Zone Setup",seed:"Desk",name:"Clear desk completely to blank surface",action:"30 min timer. Remove every single item. Sorting bins receive everything. Surface fully empty at end. Nothing returns until you decide it belongs.",time:"30 min",depth:"shallow",mvd:true},
+  {id:"w2_05",cat:"Zone Setup",seed:"Desk",name:"Decide what lives on your desk — max 5 items",action:"Notes. Write the list: laptop or notebook, pen, planner, water, nothing else by default. Write before anything goes back.",time:"10 min",depth:"shallow",quick:true,mvd:true},
+  {id:"w2_06",cat:"Paper Setup",seed:"Planner",name:"Set up this week's planner page",action:"Dates, seed blocks, one task per seed from last review. Planner matches Calendar.",time:"8 min",depth:"shallow",quick:true,mvd:true},
+  {id:"w2_07",cat:"Work",seed:"Seed 6",name:"Write Case Study 1 context section",action:"Notes > Seed 6 > Case Study Template. Section 1: Project context. What was the situation before your involvement? 3-5 sentences.",time:"25 min",depth:"deep"},
+  {id:"w2_08",cat:"App Setup",seed:"Seed 2",name:"Update Shopify store name to GLEAN",action:"Shopify Admin > Settings > Store Details. Update name and bio. Save.",time:"10 min",depth:"shallow",quick:true},
+  {id:"w2_09",cat:"Business",seed:"Seed 2",name:"Research 3 Dallas orgs for cause partnership",action:"Notes > Seed 2 > Master Log. Find 3 local organizations aligned with GLEAN values. Name, what they do, wish list link if available.",time:"25 min",depth:"deep"},
+  {id:"w2_10",cat:"Life",seed:"Weekly rhythm",name:"Laundry this week — schedule it now",action:"Open planner. Write laundry on its designated day. Set a Reminders alert for that morning.",time:"3 min",depth:"shallow",quick:true},
+  {id:"w2_11",cat:"Creative",seed:"Seed 1",name:"Seed 1: 25 min protected creative session",action:"25 min timer. Sketchbook or art supplies. One piece. Path motif as filter when stuck.",time:"25 min",depth:"deep"},
+  {id:"w2_12",cat:"Body",seed:"System",name:"Movement: 20 min any form",action:"Any form. Low mobility: seated counts.",time:"20 min",depth:"shallow"},
+  {id:"w2_13",cat:"Routine",seed:"System",name:"Evening Close",action:"Routinery. Inbox to zero. Tomorrow's task per seed in Notes and planner. Phone outside bedroom.",time:"20 min",depth:"shallow",mvd:true}
+],
+"3":[
+  {id:"w3_01",cat:"Routine",seed:"System",name:"Morning Anchor",action:"Routinery > Morning Anchor. Full sequence. Week 3.",time:"20 min",depth:"deep",mvd:true},
+  {id:"w3_02",cat:"Mind",seed:"System",name:"Morning Pages",action:"25 min. 3 pages. Let it go wherever it wants.",time:"25 min",depth:"deep",mvd:true},
+  {id:"w3_03",cat:"Soul",seed:"System",name:"Faith moment",action:"One passage. 10 min quiet.",time:"10 min",depth:"shallow",mvd:true},
+  {id:"w3_04",cat:"Zone Setup",seed:"Living Room",name:"Give the couch one job: rest only",action:"Remove everything from the couch that is not a blanket or pillow. Clothes, bags, papers — all to sorting bins. Couch is now the rest zone.",time:"15 min",depth:"shallow",quick:true,mvd:true},
+  {id:"w3_05",cat:"Physical Clearing",seed:"Living Room",name:"Clear living room floor completely",action:"25 min timer. Every item off the floor goes to its room or sorting bins. Zone rule: nothing lives on the floor permanently.",time:"25 min",depth:"shallow"},
+  {id:"w3_06",cat:"Physical Clearing",seed:"Kitchen",name:"Clear kitchen surfaces — active daily use items only",action:"Remove everything from counters. Return only items used 3+ times per week. Everything else goes in a cabinet, donated, or trashed.",time:"25 min",depth:"shallow"},
+  {id:"w3_07",cat:"Paper Setup",seed:"Planner",name:"Set up this week's planner page",action:"Dates, seed blocks, one task per seed, life tasks from weekly schedule.",time:"8 min",depth:"shallow",quick:true,mvd:true},
+  {id:"w3_08",cat:"Work",seed:"Seed 6",name:"Write Case Study 1 gap section",action:"Notes > Seed 6 > Case Study Template. Section 2: The gap. What was missing, broken, or costing the organization? Concrete.",time:"25 min",depth:"deep"},
+  {id:"w3_09",cat:"Business",seed:"Seed 2",name:"Contact first cause partner organization",action:"Email or DM your chosen org. GLEAN premise in 2 sentences. Proceeds model in 1 sentence. Ask if they have a wish list.",time:"15 min",depth:"shallow",quick:true},
+  {id:"w3_10",cat:"Creative",seed:"Seed 1",name:"Seed 1: 30 min protected creative session",action:"30 min timer. One piece. Path motif filter. Showing up is the task.",time:"30 min",depth:"deep"},
+  {id:"w3_11",cat:"Life",seed:"Health",name:"Review monthly life checklist — anything overdue?",action:"Open Notes > Monthly Life Checklist. Is anything overdue? If yes: add to Reminders Next Actions now.",time:"5 min",depth:"shallow",quick:true},
+  {id:"w3_12",cat:"Community",seed:"Foundation",name:"Foundation Saturday: document contribution",action:"After Saturday session: Notes > Seed 6 > Foundation Work. Date, observed, contributed, response. This is a consulting artifact.",time:"10 min",depth:"shallow",quick:true},
+  {id:"w3_13",cat:"Body",seed:"System",name:"Movement: 20 min any form",action:"Any form. Low mobility: seated counts.",time:"20 min",depth:"shallow"},
+  {id:"w3_14",cat:"Planning",seed:"System",name:"Weekly review: score Week 3",action:"Notes > Weekly Review Template. Duplicate, rename, answer all 5 questions. Move to Review Archive. Update planner for next week.",time:"30 min",depth:"shallow"},
+  {id:"w3_15",cat:"Routine",seed:"System",name:"Evening Close",action:"Routinery. Inbox to zero. Tomorrow's task in Notes and planner. Phone outside bedroom.",time:"20 min",depth:"shallow",mvd:true}
+],
+"4":[
+  {id:"w4_01",cat:"Routine",seed:"System",name:"Morning Anchor: Week 4",action:"Routinery > Morning Anchor. 4 weeks. Write one sentence in Seed 6 Master Log about what this consistency demonstrates.",time:"20 min",depth:"deep",mvd:true},
+  {id:"w4_02",cat:"Mind",seed:"System",name:"Morning Pages",action:"25 min. 3 pages. Write about what the apartment feels like when the clearing is complete.",time:"25 min",depth:"deep",mvd:true},
+  {id:"w4_03",cat:"Soul",seed:"System",name:"Faith moment",action:"One passage. 10 min quiet.",time:"10 min",depth:"shallow",mvd:true},
+  {id:"w4_04",cat:"Physical Clearing",seed:"Apartment",name:"Boss prep: complete The Chaos audit for every room",action:"Notes > new note: Chaos Audit. Go room by room. Rate each zone 1-3: 1 held, 2 improved but needs work, 3 not started. Data, not judgment.",time:"20 min",depth:"shallow",mvd:true},
+  {id:"w4_05",cat:"Paper Setup",seed:"Planner",name:"Check planner consistency — how many days this week?",action:"Open planner. Count days with entries. Write the number. Under 5: write what got in the way. 5+: write what made it work.",time:"5 min",depth:"shallow",quick:true,mvd:true},
+  {id:"w4_06",cat:"Life",seed:"Weekly rhythm",name:"Review weekly life schedule — is it actually running?",action:"Notes > My Weekly Life Schedule. Did the weekly rhythm happen this week? If not: what blocked it? Adjust one thing for next week.",time:"10 min",depth:"shallow",quick:true},
+  {id:"w4_07",cat:"Work",seed:"Seed 6",name:"Complete Case Study 1: approach and outcome sections",action:"Notes > Case Study Template. Sections 3 and 4: what you did and what changed. Your first consulting artifact.",time:"30 min",depth:"deep"},
+  {id:"w4_08",cat:"App Setup",seed:"Seed 6",name:"Identify 3 consulting case study candidates",action:"Notes > Seed 6 > Case Studies. List 3 specific projects from current or past work. These become Cases 1, 2, and 3.",time:"20 min",depth:"shallow"},
+  {id:"w4_09",cat:"Business",seed:"Seed 2",name:"Set up Shopify Email newsletter template",action:"Shopify Admin > Marketing > Campaigns > Shopify Email. Create template: what we funded this month + new arrivals + GLEAN philosophy. Save as draft.",time:"20 min",depth:"shallow"},
+  {id:"w4_10",cat:"Creative",seed:"Seed 1",name:"Seed 1: 30 min protected creative session",action:"30 min timer. One piece. Path motif filter.",time:"30 min",depth:"deep"},
+  {id:"w4_11",cat:"Body",seed:"System",name:"Movement: 4 sessions this week — session 1",action:"20 min any form. Session 1 of 4.",time:"20 min",depth:"shallow"},
+  {id:"w4_12",cat:"Planning",seed:"System",name:"Boss fight weekly review: all 5 questions",action:"Notes > Weekly Review Template. Duplicate. Rename. Answer every question. Did the clearing hold? Did the rhythm hold? Are seeds growing? Update planner. Check Boss tab.",time:"45 min",depth:"deep",mvd:true},
+  {id:"w4_13",cat:"Routine",seed:"System",name:"Evening Close",action:"Routinery. Inbox to zero. Tomorrow's task in Notes and planner. Phone outside bedroom.",time:"20 min",depth:"shallow",mvd:true}
+]
+};
+
+function uid(){return"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+
+var S={
+  xp:0,level:1,streak:0,lastDate:null,
+  checked:{},skipCounts:{},energy:"Medium",
+  week:"0",view:"today",
+  carriedTasks:{},customTasks:{},overrides:{},deletedIds:{},
+  bossDone:{},showLU:false,luData:null,
+  openMenu:null,editModal:null,addModal:null,
+  reviewData:{},parkingLot:[],reviewSaved:false,
+  setupDone:{},setupDismissed:false,
+  plannerOpen:true
+};
+
+function getLvl(){for(var i=LEVELS.length-1;i>=0;i--){if(S.xp>=LEVELS[i].xp)return LEVELS[i];}return LEVELS[0];}
+function getNxt(){var c=getLvl();for(var i=0;i<LEVELS.length;i++){if(LEVELS[i].xp>c.xp)return LEVELS[i];}return null;}
+
+function load(){
+  try{
+    var d=localStorage.getItem("architect_v10");
+    if(d){var p=JSON.parse(d);Object.keys(p).forEach(function(k){S[k]=p[k];});}
+  }catch(e){}
+}
+function save(){
+  try{localStorage.setItem("architect_v10",JSON.stringify(S));}catch(e){}
+}
+
+function getBaseTasks(){
+  var base=(TASKS[S.week]||[])
+    .filter(function(t){return!S.deletedIds[t.id];})
+    .map(function(t){return S.overrides[t.id]?Object.assign({},t,S.overrides[t.id]):t;});
+  var carried=(S.carriedTasks[S.week]||[]).filter(function(t){return!S.deletedIds[t.id];});
+  var custom=(S.customTasks["w"+S.week]||[]).filter(function(t){return!S.deletedIds[t.id];});
+  var all=base
+    .concat(carried.map(function(t){return Object.assign({},t,{carried:true});}))
+    .concat(custom);
+  if(S.energy==="Low") all=all.filter(function(t){return t.mvd||t.carried;});
+  return all;
+}
+
+function handleSkip(task){
+  var rule=task.skipRule||SR[task.cat]||"nc";
+  var count=(S.skipCounts[task.id]||0)+1;
+  S.skipCounts[task.id]=count;
+  S.checked[task.id]="skip";
+  if(rule==="c"||rule==="co"){
+    var nw=String(parseInt(S.week)+1);
+    if(!S.carriedTasks[nw])S.carriedTasks[nw]=[];
+    var already=S.carriedTasks[nw].some(function(t){return t.id===task.id;});
+    if(!already&&!(rule==="co"&&count>=2)){
+      S.carriedTasks[nw].push(Object.assign({},task,{carriedFrom:"Week "+S.week,skipCount:count}));
+    }
+    if(rule==="co"&&count>=2){
+      S.parkingLot.push({id:uid(),name:task.name,from:"Carried twice — auto-moved from Week "+S.week,type:"someday"});
+    }
+  }
+  save();render();
+}
+
+function getUnlocked(){
+  var lvl=getLvl().lvl;var u=[];
+  if(lvl>=1)u.push(0);if(lvl>=3)u.push(1);if(lvl>=5)u.push(2);
+  if(lvl>=6)u.push(3);if(lvl>=7)u.push(4);if(lvl>=9)u.push(5);
+  return u;
+}
+
+function render(){
+  var app=document.getElementById("app");
+  var nav=document.getElementById("bottom-nav");
+  app.innerHTML="";
+  nav.innerHTML="";
+
+  // LEVEL UP SCREEN
+  if(S.showLU&&S.luData){
+    app.innerHTML='<div style="padding:16px"><div class="lu-wrap"><div class="lu-lvl">Level '+S.luData.lvl+' \u2014 '+S.luData.name+'</div><div class="lu-sub">The city responds to your commitment.</div><div class="lu-unlock">'+S.luData.unlock+'</div><button class="lu-btn" id="lu-b">Continue building &#8594;</button></div></div>';
+    document.getElementById("lu-b").onclick=function(){S.showLU=false;save();render();};
+    buildNav(nav);
+    return;
+  }
+
+  if(S.editModal){renderModal(app,"edit");buildNav(nav);return;}
+  if(S.addModal){renderModal(app,"add");buildNav(nav);return;}
+
+  // HEADER
+  var lvl=getLvl(),nxt=getNxt();
+  var pct=nxt?Math.round(((S.xp-lvl.xp)/(nxt.xp-lvl.xp))*100):100;
+  var hdr=document.createElement("div");hdr.className="hdr";
+  hdr.innerHTML='<div class="hdr-top"><span class="hdr-title">The Architect</span><div class="xp-row"><span class="xp-val">'+S.xp+'</span><span class="xp-lbl">XP</span><span class="lvl-badge">LVL '+lvl.lvl+'</span></div></div><div class="xp-bar"><div class="xp-fill" style="width:'+pct+'%"></div></div><div class="xp-sub"><span>'+S.xp+' / '+(nxt?nxt.xp:'max')+' XP</span><span>'+lvl.name+'</span></div>';
+  app.appendChild(hdr);
+
+  if(S.view==="today") renderToday(app);
+  else if(S.view==="city") renderCity(app);
+  else if(S.view==="boss") renderBoss(app);
+  else if(S.view==="review") renderReview(app);
+  else if(S.view==="vision") renderVision(app);
+  else if(S.view==="parking") renderParking(app);
+
+  buildNav(nav);
+
+  if(S.openMenu){
+    document.addEventListener("click",function h(e){
+      if(!e.target.closest(".task-menu")&&!e.target.closest(".tdots")){
+        S.openMenu=null;render();document.removeEventListener("click",h);
+      }
+    },{once:true,capture:true});
+  }
+}
+
+function buildNav(nav){
+  var items=[
+    {icon:"&#9728;",label:"Today",v:"today"},
+    {icon:"&#9672;",label:"City",v:"city"},
+    {icon:"&#8599;",label:"Boss",v:"boss"},
+    {icon:"&#9678;",label:"Review",v:"review"},
+    {icon:"&#10022;",label:"Vision",v:"vision"},
+    {icon:"P",label:"Lot",v:"parking"}
+  ];
+  items.forEach(function(item){
+    var active=S.view===item.v;
+    var b=document.createElement("button");b.className="bn-btn";
+    b.innerHTML='<div class="bn-icon">'+item.icon+'</div><div class="bn-label'+(active?" a":"")+'">'+item.label+'</div><div class="bn-dot'+(active?" a":"")+'"></div>';
+    b.onclick=function(){S.view=item.v;S.openMenu=null;document.getElementById("scroll-area").scrollTop=0;render();};
+    nav.appendChild(b);
+  });
+}
+
+function renderToday(app){
+  // Streak
+  var sbar=document.createElement("div");sbar.className="streak-bar";
+  var dots="";for(var i=0;i<7;i++)dots+='<div class="s-dot'+(i<Math.min(S.streak,7)?" l":"")+'"></div>';
+  sbar.innerHTML='<span class="streak-num">'+S.streak+'</span><span class="streak-lbl">day streak</span><div class="s-dots">'+dots+'</div>';
+  app.appendChild(sbar);
+
+  // Energy
+  var erow=document.createElement("div");erow.className="energy-row";
+  ["Low","Medium","High"].forEach(function(e){
+    var b=document.createElement("button");
+    b.className="e-btn"+(S.energy===e?" s"+e[0].toLowerCase():"");
+    b.textContent=e+" energy";
+    b.onclick=function(){S.energy=e;save();render();};
+    erow.appendChild(b);
+  });
+  app.appendChild(erow);
+
+  // Week selector
+  var wsel=document.createElement("div");wsel.className="wsel";
+  var wl=document.createElement("span");wl.className="wsel-lbl";wl.textContent="Week";wsel.appendChild(wl);
+  [{v:"0",l:"Pre-Week"},{v:"1",l:"W1"},{v:"2",l:"W2"},{v:"3",l:"W3"},{v:"4",l:"W4"}].forEach(function(w){
+    var wp=document.createElement("button");wp.className="wpill"+(S.week===w.v?" a":"");wp.textContent=w.l;
+    (function(wv){wp.onclick=function(){S.week=wv;S.openMenu=null;save();render();};})(w.v);
+    wsel.appendChild(wp);
+  });
+  app.appendChild(wsel);
+
+  // Day pills
+  var today=(new Date().getDay()+6)%7;
+  var drow=document.createElement("div");drow.className="day-row";
+  DAYS.forEach(function(d,di){
+    var tasks=TASKS[S.week]||[];
+    var done=tasks.filter(function(t){return S.checked[t.id]==="done";}).length;
+    var isToday=di===today,isDone=tasks.length>0&&done===tasks.length;
+    var pill=document.createElement("div");pill.className="day-pill"+(isToday?" td":"")+(isDone&&!isToday?" dn":"");
+    pill.innerHTML='<div class="dp-n">'+d+'</div><div class="dp-d"></div>';drow.appendChild(pill);
+  });
+  app.appendChild(drow);
+
+  // Progress
+  var tasks=getBaseTasks();
+  var done=tasks.filter(function(t){return S.checked[t.id]==="done";}).length;
+  var skipped=tasks.filter(function(t){return S.checked[t.id]==="skip";}).length;
+  var pp=tasks.length>0?Math.round((done/tasks.length)*100):0;
+  var prow=document.createElement("div");prow.className="prog-row";
+  prow.innerHTML='<div class="prog-track"><div class="prog-fill" style="width:'+pp+'%"></div></div><div class="prog-num">'+done+' / '+tasks.length+(skipped>0?" \u00b7 "+skipped+" skipped":"")+'</div>';
+  app.appendChild(prow);
+
+  // Day planner
+  var totalMin=tasks.reduce(function(a,t){var m=parseInt(t.time);return a+(isNaN(m)?0:m);},0);
+  var pw=document.createElement("div");pw.className="planner-wrap";
+  var ph=document.createElement("div");ph.className="planner-hdr";
+  ph.innerHTML='<span class="planner-title">Block structure</span><span class="planner-total">\u223c'+totalMin+' min total</span><span class="planner-toggle" id="ptoggle">'+(S.plannerOpen?"hide \u25b2":"show \u25bc")+'</span>';
+  pw.appendChild(ph);
+  ph.querySelector("#ptoggle").onclick=function(){S.plannerOpen=!S.plannerOpen;save();render();};
+  if(S.plannerOpen){
+    var pb=document.createElement("div");pb.className="planner-blocks";
+    DAY_BLOCKS.forEach(function(block){
+      var bTasks=tasks.filter(function(t){return block.taskCats.indexOf(t.cat)>-1&&S.checked[t.id]!=="done";});
+      var row=document.createElement("div");row.className="planner-block";
+      var dot=document.createElement("div");dot.className="pb-dot";dot.style.background=block.color;
+      var info=document.createElement("div");info.className="pb-info";
+      var names=bTasks.slice(0,2).map(function(t){return t.name.length>28?t.name.substring(0,26)+"\u2026":t.name;});
+      info.innerHTML='<div class="pb-name">'+block.name+'</div><div class="pb-tasks">'+(names.length>0?names.join(" \u00b7 "):block.hint)+'</div>';
+      var right=document.createElement("div");right.className="pb-right";
+      right.innerHTML='<div class="pb-time">'+block.time+'</div><div class="pb-type" style="background:'+block.tbg+';color:'+block.tt+'">'+block.type+'</div>';
+      row.appendChild(dot);row.appendChild(info);row.appendChild(right);pb.appendChild(row);
+    });
+    pw.appendChild(pb);
+  }
+  app.appendChild(pw);
+
+  // Notification setup prompt
+  var setupCount=Object.keys(S.setupDone).filter(function(k){return S.setupDone[k];}).length;
+  if(!S.setupDismissed){
+    var sp=document.createElement("div");sp.className="setup-prompt";
+    sp.innerHTML='<div class="sp-title">&#128276; Connect notifications \u2014 '+setupCount+' / '+SETUP_STEPS.length+' done</div><div class="sp-body">5 steps to connect Routinery and Calendar to your system. Each is worth +15 XP.</div>';
+    var stepsDiv=document.createElement("div");stepsDiv.className="sp-steps";
+    SETUP_STEPS.forEach(function(step){
+      var isDone=!!S.setupDone[step.id];
+      var row=document.createElement("div");row.className="sp-step";
+      row.innerHTML='<div class="sp-step-num">'+step.id.replace("s","")+'</div><div class="sp-step-body"><div class="sp-step-title">'+step.title+'</div><div class="sp-step-desc">'+step.desc+'</div></div>';
+      var chk=document.createElement("div");chk.className="sp-check"+(isDone?" done":"");chk.textContent=isDone?"\u2713":"";
+      (function(sid){chk.onclick=function(){
+        if(!S.setupDone[sid]){
+          S.setupDone[sid]=true;
+          var prev=getLvl().lvl;S.xp+=15;
+          var now=getLvl();if(now.lvl>prev){S.showLU=true;S.luData=now;}
+        } else {
+          S.setupDone[sid]=false;S.xp=Math.max(0,S.xp-15);
+        }
+        save();render();
+      };})(step.id);
+      row.appendChild(chk);stepsDiv.appendChild(row);
+    });
+    sp.appendChild(stepsDiv);
+    if(setupCount===SETUP_STEPS.length){
+      var dis=document.createElement("span");dis.className="sp-dismiss";dis.textContent="All done \u2014 dismiss";
+      dis.onclick=function(){S.setupDismissed=true;save();render();};sp.appendChild(dis);
+    }
+    app.appendChild(sp);
+  }
+
+  // Energy banner
+  if(S.energy==="Low"){
+    var mb=document.createElement("div");mb.className="banner";mb.style.cssText="background:rgba(226,75,74,0.06);border-color:rgba(226,75,74,0.25)";
+    mb.innerHTML='<div class="banner-title" style="color:#F09595">Minimum viable day</div><div class="banner-body">MVD tasks only. Completing these is a full win. Rest is the work today.</div>';
+    app.appendChild(mb);
+  }
+
+  // Carry note
+  var carried=tasks.filter(function(t){return t.carried;});
+  if(carried.length>0){
+    var cn=document.createElement("div");cn.className="carry-note";
+    cn.textContent=carried.length+" task"+(carried.length>1?"s":"")+" carried forward. Re-skip twice \u2192 Parking Lot.";
+    app.appendChild(cn);
+  }
+
+  // Task groups
+  var groups=[
+    {keys:["Physical Clearing","Digital Clearing","Paper Clearing"],label:"The Clearing",dot:"#F5C842",color:"#E8A800"},
+    {keys:["Zone Setup","App Setup","Paper Setup"],label:"Setup",dot:"#378ADD",color:"#85B7EB"},
+    {keys:["Life"],label:"Life maintenance",dot:"#639922",color:"#97C459"},
+    {keys:["Routine","Mind","Body","Soul","Planning","Work","Creative","Business","Community","Custom"],label:"Daily quests",dot:"#605850",color:"#A09890"}
+  ];
+  groups.forEach(function(g){
+    var gt=tasks.filter(function(t){return g.keys.indexOf(t.cat)>-1;});
+    if(!gt.length)return;
+    var sl=document.createElement("div");sl.className="sec-label";sl.style.color=g.color;
+    sl.innerHTML='<div class="sec-dot" style="background:'+g.dot+'"></div>'+g.label;
+    app.appendChild(sl);
+    gt.forEach(function(t){app.appendChild(makeCard(t));});
+  });
+
+  // Day complete
+  if(done===tasks.length&&tasks.length>0){
+    var dw=document.createElement("div");dw.className="day-win";
+    dw.innerHTML='<div class="dw-title">Day complete</div><div class="dw-sub">All tasks done. The city grows.</div>';
+    app.appendChild(dw);
+  }
+
+  // Add task row
+  var ainp=document.createElement("input");ainp.className="add-inp";ainp.type="text";ainp.placeholder="Add a task for today...";
+  var abtn=document.createElement("button");abtn.className="add-btn";abtn.textContent="+ Add";
+  abtn.onclick=function(){var v=ainp.value.trim();if(!v)return;S.addModal={name:v};render();};
+  ainp.addEventListener("keydown",function(e){if(e.key==="Enter"&&ainp.value.trim()){S.addModal={name:ainp.value.trim()};render();}});
+  var arow=document.createElement("div");arow.className="add-row";arow.appendChild(ainp);arow.appendChild(abtn);
+  app.appendChild(arow);
+}
+
+function renderCity(app){
+  var unlocked=getUnlocked(),lvl=getLvl().lvl;
+  var d1o=unlocked.indexOf(0)>-1?1:0.15;
+  var d2o=unlocked.indexOf(1)>-1?1:0.1;
+  var d3o=unlocked.indexOf(2)>-1?0.85:0.08;
+  var cw=document.createElement("div");cw.className="city-wrap";
+  var sb=document.createElement("div");sb.className="city-svg-box";
+  sb.innerHTML='<svg viewBox="0 0 360 202" xmlns="http://www.w3.org/2000/svg">'
+    +'<rect width="360" height="202" fill="#0F0F14"/>'
+    +'<rect x="0" y="160" width="360" height="42" fill="#1A1A24"/>'
+    +'<rect x="0" y="155" width="360" height="8" fill="#13131C"/>'
+    +'<g opacity="0.5"><rect x="10" y="120" width="14" height="40" fill="#242433" rx="2"/><rect x="28" y="130" width="10" height="30" fill="#1E1E2C" rx="1"/><rect x="42" y="110" width="16" height="50" fill="#242433" rx="2"/><rect x="60" y="125" width="12" height="35" fill="#1E1E2C" rx="1"/><rect x="310" y="118" width="16" height="42" fill="#1E1E2C" rx="2"/><rect x="330" y="120" width="14" height="40" fill="#242433" rx="2"/></g>'
+    +'<g opacity="'+d1o+'">'
+    +'<rect x="100" y="88" width="22" height="72" fill="#3C3489" rx="2"/>'
+    +'<rect x="98" y="85" width="26" height="5" fill="#534AB7"/>'
+    +'<rect x="125" y="98" width="16" height="62" fill="#2C2469" rx="2"/>'
+    +'<rect x="148" y="93" width="20" height="67" fill="#3C3489" rx="2"/>'
+    +'<rect x="146" y="90" width="24" height="5" fill="#534AB7"/>'
+    +'<rect x="108" y="138" width="6" height="3" fill="#F5C842"/>'
+    +'<rect x="116" y="138" width="6" height="3" fill="#F5C842"/>'
+    +'<rect x="108" y="108" width="6" height="3" fill="#7F77DD"/>'
+    +'<text x="122" y="82" font-size="7" fill="#AFA9EC" text-anchor="middle" font-family="system-ui">D1</text>'
+    +'</g>'
+    +'<g opacity="'+d2o+'">'
+    +'<rect x="172" y="103" width="18" height="57" fill="#854F0B" rx="2"/>'
+    +'<rect x="170" y="100" width="22" height="5" fill="#EF9F27"/>'
+    +'<rect x="193" y="110" width="14" height="50" fill="#633806" rx="2"/>'
+    +'<rect x="210" y="96" width="20" height="64" fill="#854F0B" rx="2"/>'
+    +'<rect x="208" y="93" width="24" height="5" fill="#EF9F27"/>'
+    +'<text x="196" y="89" font-size="7" fill="#EF9F27" text-anchor="middle" font-family="system-ui">D2</text>'
+    +'</g>'
+    +'<g opacity="'+d3o+'">'
+    +'<rect x="237" y="110" width="14" height="50" fill="#0F6E56" rx="2"/>'
+    +'<rect x="253" y="118" width="12" height="42" fill="#085041" rx="2"/>'
+    +'<rect x="267" y="104" width="16" height="56" fill="#0F6E56" rx="2"/>'
+    +'<text x="254" y="98" font-size="7" fill="#1D9E75" text-anchor="middle" font-family="system-ui">D3</text>'
+    +'</g>'
+    +'<rect x="0" y="0" width="360" height="28" fill="rgba(15,15,20,0.85)"/>'
+    +'<text x="10" y="18" font-size="9" fill="#605850" font-family="system-ui">Week '+S.week+' of 12</text>'
+    +'<text x="350" y="18" font-size="9" fill="#A09890" font-family="system-ui" text-anchor="end">'+getLvl().name+'</text>'
+    +'<circle cx="313" cy="12" r="7" fill="#1A1A24"/>'
+    +'<circle cx="289" cy="5" r="1.5" fill="#F5C842"/>'
+    +'<circle cx="275" cy="9" r="1" fill="#A09890"/>'
+    +'</svg>';
+  cw.appendChild(sb);
+  var phase=document.createElement("div");phase.className="city-phase";
+  phase.textContent=lvl<=2
+    ?"The ruins await clearing \u2014 complete Pre-Week tasks to begin building"
+    :lvl<=4
+    ?"The Foundation rises \u2014 earn "+(500-S.xp)+" more XP to unlock The Market"
+    :"The city is transforming \u2014 keep building";
+  cw.appendChild(phase);
+  var grid=document.createElement("div");grid.className="district-grid";
+  var districts=[
+    {name:"The Foundation",seed:"Seed 6",color:"#7F77DD",cat:"Work"},
+    {name:"The Market",seed:"Seed 2",color:"#EF9F27",cat:"Business"},
+    {name:"The Gallery",seed:"Seed 1",color:"#1D9E75",cat:"Creative"},
+    {name:"The Commons",seed:"Seed 3",color:"#D4537E",cat:"Community"},
+    {name:"The Workshop",seed:"Seed 4",color:"#D85A30",cat:""},
+    {name:"The Academy",seed:"Seed 5",color:"#378ADD",cat:""}
+  ];
+  districts.forEach(function(d,i){
+    var isU=unlocked.indexOf(i)>-1;
+    var card=document.createElement("div");card.className="d-card"+(isU?" ul":" lk");
+    var rel=(TASKS[S.week]||[]).filter(function(t){return t.cat===d.cat;});
+    var dn=rel.filter(function(t){return S.checked[t.id]==="done";}).length;
+    var pct=rel.length>0?Math.round((dn/rel.length)*100):0;
+    card.innerHTML='<div class="d-name">'+d.name+'</div><div class="d-seed">'+d.seed+(isU?" \u00b7 Active":" \u00b7 Locked")+'</div><div class="d-bar"><div class="d-fill" style="width:'+pct+'%;background:'+d.color+'"></div></div>';
+    grid.appendChild(card);
+  });
+  cw.appendChild(grid);app.appendChild(cw);
+}
+
+function renderReview(app){
+  var screen=document.createElement("div");screen.className="review-screen";
+  var card=document.createElement("div");card.className="r-card";
+  var h=document.createElement("div");h.className="r-hdr";
+  h.innerHTML='<div class="r-hdr-title">Weekly review \u2014 Week '+S.week+'</div><div class="r-hdr-sub">The most important 30 min of the week. Every Sunday. +30 XP on save.</div>';
+  card.appendChild(h);
+  var qs=[
+    {key:"score",label:"Days the daily rhythm held",type:"score"},
+    {key:"moved",label:"What moved forward this week",type:"ta",ph:"One concrete thing per active seed\u2026"},
+    {key:"blocked",label:"What got blocked",type:"ta",ph:"Name the obstacle, not the feeling\u2026"},
+    {key:"next6",label:"Seed 6 \u2014 one task next week",type:"ta",ph:"The single most important Seed 6 task\u2026"},
+    {key:"next2",label:"Seed 2 \u2014 one task next week",type:"ta",ph:"The single most important Seed 2 task\u2026"},
+    {key:"adjust",label:"Does the plan need adjusting?",type:"ta",ph:"One sentence. If nothing changes: plan holds."}
+  ];
+  qs.forEach(function(q){
+    var qrow=document.createElement("div");qrow.className="r-q";
+    var lbl=document.createElement("div");lbl.className="r-q-lbl";lbl.textContent=q.label;qrow.appendChild(lbl);
+    if(q.type==="ta"){
+      var ta=document.createElement("textarea");ta.className="r-ta";ta.placeholder=q.ph||"";ta.rows=2;ta.value=S.reviewData[q.key]||"";
+      ta.oninput=function(){S.reviewData[q.key]=ta.value;save();};qrow.appendChild(ta);
+    } else {
+      var sr=document.createElement("div");sr.className="score-row";
+      ["1","2","3","4","5","6","7"].forEach(function(n){
+        var sb=document.createElement("button");sb.className="score-btn"+(S.reviewData[q.key]===n?" sel":"");
+        sb.textContent=n;
+        (function(nn){sb.onclick=function(){S.reviewData[q.key]=nn;save();renderReview(app);};})(n);
+        sr.appendChild(sb);
+      });
+      qrow.appendChild(sr);
+    }
+    card.appendChild(qrow);
+  });
+  if(S.reviewSaved){
+    var saved=document.createElement("div");saved.className="r-saved";saved.textContent="Week "+S.week+" review saved \u2713 (+30 XP)";card.appendChild(saved);
+  } else {
+    var saveBtn=document.createElement("button");saveBtn.className="r-save-btn";saveBtn.textContent="Save this week's review (+30 XP)";
+    saveBtn.onclick=function(){
+      var prev=getLvl().lvl;S.reviewSaved=true;S.xp+=30;
+      var now=getLvl();if(now.lvl>prev){S.showLU=true;S.luData=now;}
+      save();renderReview(app);
+    };
+    card.appendChild(saveBtn);
+  }
+  screen.appendChild(card);app.appendChild(screen);
+}
+
+function renderVision(app){
+  var screen=document.createElement("div");screen.className="vision-screen";
+  var gc=document.createElement("div");gc.className="v-gc";
+  gc.innerHTML='<div class="v-lbl">Guiding conception</div><div class="v-txt">Using creative expression to create experiences that challenge the distance between who people fully are and what the world has decided they\'re allowed to become, expanding what they believe is possible for themselves and everything their existence touches.</div>';
+  var gp=document.createElement("div");gp.className="v-gp";
+  gp.innerHTML='<div class="v-lbl">Guiding principle</div><div class="v-txt">If it requires shrinking who you are to make it palatable, it doesn\'t belong. Every project has to hold the full weight of the vision, executed with the kind of strategic commitment that makes the impact undeniable and reminds someone out there that there was always space for them to show up fully too.</div>';
+  screen.appendChild(gc);screen.appendChild(gp);
+  var sl=document.createElement("div");sl.style.cssText="font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;padding:0 2px";sl.textContent="Six seed projects";screen.appendChild(sl);
+  SEEDS.forEach(function(seed){
+    var card=document.createElement("div");card.className="s-card";card.style.borderLeft="3px solid "+seed.color;card.style.borderRadius="0 10px 10px 0";
+    card.innerHTML='<div class="s-hdr"><span class="s-num">Seed '+seed.num+'</span><span class="s-score">'+seed.score+'</span></div><div class="s-title">'+seed.title+'</div><div class="s-desc">'+seed.desc+'</div>';
+    screen.appendChild(card);
+  });
+  app.appendChild(screen);
+}
+
+function renderBoss(app){
+  var screen=document.createElement("div");screen.className="boss-screen";
+  var bXP=Object.keys(S.bossDone).filter(function(k){return S.bossDone[k];}).length*50;
+  var hp=Math.max(0,100-Math.round((bXP/250)*100));
+  var card=document.createElement("div");card.className="boss-card";
+  card.innerHTML='<div class="boss-name">The Chaos Boss</div><div class="boss-desc">Your first test at Week 4. Defeat by proving the foundation holds \u2014 routines survived, clearing is real, seeds are in the ground.</div><div class="boss-health"><div class="boss-hp" style="width:'+hp+'%"></div></div><div class="boss-hp-lbl">'+hp+'% health remaining \u00b7 defeat at 0%</div>';
+  var bTasks=document.createElement("div");bTasks.className="boss-tasks";
+  BOSS_TASKS.forEach(function(task){
+    var isDone=!!S.bossDone[task.id];
+    var row=document.createElement("div");row.className="bt";
+    var chk=document.createElement("div");chk.className="bt-chk"+(isDone?" done":"");chk.textContent=isDone?"\u2713":"";
+    chk.onclick=function(){
+      if(!S.bossDone[task.id]){
+        S.bossDone[task.id]=true;var prev=getLvl().lvl;S.xp+=task.xp;
+        var now=getLvl();if(now.lvl>prev){S.showLU=true;S.luData=now;}
+      } else {
+        S.bossDone[task.id]=false;S.xp=Math.max(0,S.xp-task.xp);
+      }
+      save();render();
+    };
+    var body=document.createElement("div");
+    body.innerHTML='<div class="bt-txt"'+(isDone?' style="text-decoration:line-through;color:var(--text3)"':'')+'>'+task.text+'</div><div class="bt-xp">+'+task.xp+' XP on defeat</div>';
+    row.appendChild(chk);row.appendChild(body);bTasks.appendChild(row);
+  });
+  card.appendChild(bTasks);
+  if(hp===0){
+    card.innerHTML+='<div style="background:var(--tealbg);border:1px solid rgba(29,158,117,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center"><div style="font-size:14px;font-weight:500;color:var(--teal);margin-bottom:3px">Boss defeated</div><div style="font-size:12px;color:var(--text2)">The Clearing is complete. The foundations hold.</div></div>';
+  }
+  screen.appendChild(card);
+  var upcoming=document.createElement("div");upcoming.style.cssText="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px";
+  upcoming.innerHTML='<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px">Upcoming bosses</div><div style="font-size:12px;color:var(--text3);margin-bottom:5px">Week 8 \u00b7 The Inertia Boss \u2014 are the seeds actually growing?</div><div style="font-size:12px;color:var(--text3)">Week 12 \u00b7 The Doubt Boss \u2014 the final confrontation</div>';
+  screen.appendChild(upcoming);app.appendChild(screen);
+}
+
+function renderParking(app){
+  var screen=document.createElement("div");screen.className="parking-screen";
+  var sm=S.parkingLot.filter(function(p){return p.type==="someday";});
+  var ideas=S.parkingLot.filter(function(p){return p.type==="idea";});
+
+  var sl1=document.createElement("div");sl1.className="p-section-title";sl1.innerHTML='<div class="p-dot" style="background:#605850"></div>Someday Maybe ('+sm.length+')';screen.appendChild(sl1);
+  if(!sm.length){
+    var e=document.createElement("div");e.style.cssText="background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:12px;color:var(--text3);font-style:italic;margin-bottom:10px";
+    e.textContent="Tasks skipped twice land here automatically.";screen.appendChild(e);
+  }
+  sm.forEach(function(p){
+    var item=document.createElement("div");item.className="p-item";
+    item.innerHTML='<div class="p-name">'+p.name+'</div><div class="p-meta">'+p.from+'</div>';
+    var mv=document.createElement("span");mv.className="p-move";mv.textContent="Move to next week \u2197";
+    (function(pid){mv.onclick=function(){
+      var itm=S.parkingLot.find(function(x){return x.id===pid;});if(!itm)return;
+      var nw="w"+(parseInt(S.week)+1);
+      if(!S.customTasks[nw])S.customTasks[nw]=[];
+      S.customTasks[nw].push({id:uid(),cat:"Custom",seed:"Custom",name:itm.name,action:"",time:"?",xp:10,depth:"shallow",custom:true});
+      S.parkingLot=S.parkingLot.filter(function(x){return x.id!==pid;});
+      save();render();
+    };})(p.id);
+    item.appendChild(mv);screen.appendChild(item);
+  });
+
+  var sl2=document.createElement("div");sl2.className="p-section-title";sl2.style.marginTop="14px";sl2.innerHTML='<div class="p-dot" style="background:#378ADD"></div>Ideas and future seeds ('+ideas.length+')';screen.appendChild(sl2);
+  ideas.forEach(function(p){
+    var item=document.createElement("div");item.className="p-item";
+    item.innerHTML='<div class="p-name">'+p.name+'</div><div class="p-meta">'+p.from+'</div>';
+    screen.appendChild(item);
+  });
+
+  var ar=document.createElement("div");ar.style.marginTop="10px";
+  var ai=document.createElement("input");ai.className="p-inp";ai.placeholder="Add an idea or future task...";ai.type="text";
+  var ab=document.createElement("button");ab.className="p-btn";ab.textContent="Add idea";
+  ab.onclick=function(){
+    var v=ai.value.trim();if(!v)return;
+    S.parkingLot.push({id:uid(),name:v,from:"Added manually",type:"idea"});
+    ai.value="";save();renderParking(app);
+  };
+  var pr=document.createElement("div");pr.className="p-add-row";pr.appendChild(ai);pr.appendChild(ab);ar.appendChild(pr);screen.appendChild(ar);
+  app.appendChild(screen);
+}
+
+function makeCard(task){
+  var status=S.checked[task.id]||"";
+  var isDone=status==="done",isSkip=status==="skip";
+  var bs=CS[task.cat]||CS.Custom;
+  var xpAmt=task.xp||(XM[task.cat]||10);
+  var rule=task.skipRule||SR[task.cat]||"nc";
+  var isMenuOpen=S.openMenu===task.id;
+
+  var card=document.createElement("div");
+  card.className="task-item"+(isDone?" comp":"")+(isSkip?" skip-state":"")+(task.carried?" carried":"");
+
+  var chk=document.createElement("div");chk.className="chk"+(isDone?" done":"")+(isSkip?" sk":"");
+  chk.textContent=isDone?"\u2713":(isSkip?"\u00d7":"");
+  chk.onclick=function(){
+    if(S.checked[task.id]==="done"){
+      S.xp=Math.max(0,S.xp-xpAmt);S.checked[task.id]="";save();render();
+    } else {
+      var prev=getLvl().lvl;S.checked[task.id]="done";S.xp+=xpAmt;
+      var now=getLvl();if(now.lvl>prev){S.showLU=true;S.luData=now;}
+      save();render();
+    }
+  };
+
+  var body=document.createElement("div");body.className="task-body";
+  var nm=document.createElement("div");nm.className="task-name";nm.textContent=task.name;
+  var chips=document.createElement("div");chips.className="chips";
+
+  var cc=document.createElement("span");cc.className="chip";cc.style.cssText="background:"+bs.bg+";color:"+bs.t;cc.textContent=task.cat;
+  var sc=document.createElement("span");sc.className="c-seed";sc.textContent=task.seed;
+  var tc=document.createElement("span");tc.className="c-time";tc.textContent=task.time;
+  var xc=document.createElement("span");xc.className="c-xp";xc.textContent="+"+xpAmt+" XP";
+
+  var blockName="";
+  DAY_BLOCKS.forEach(function(b){if(b.taskCats.indexOf(task.cat)>-1) blockName=b.name;});
+  if(!blockName) blockName=task.depth==="deep"?"Deep work":"Shallow work";
+  var bc=document.createElement("span");bc.className="c-block";
+  bc.style.cssText="background:"+(task.depth==="deep"?"rgba(127,119,221,0.12)":"rgba(29,158,117,0.12)")+";color:"+(task.depth==="deep"?"#AFA9EC":"#5DCAA5");
+  bc.textContent=blockName;
+
+  chips.appendChild(cc);chips.appendChild(sc);chips.appendChild(tc);chips.appendChild(xc);chips.appendChild(bc);
+  if(task.quick){var qc=document.createElement("span");qc.className="c-quick";qc.textContent="quick win";chips.appendChild(qc);}
+  if(task.carried){var crc=document.createElement("span");crc.className="c-carry";crc.textContent="carried";chips.appendChild(crc);}
+
+  body.appendChild(nm);body.appendChild(chips);
+  if(task.action){var act=document.createElement("div");act.className="task-action";act.textContent=task.action;body.appendChild(act);}
+
+  var si=document.createElement("div");si.className="skip-info";
+  if(rule==="nc") si.textContent="Skip: no carry-forward. Never miss twice.";
+  else if(rule==="c") si.textContent="Skip: carries to next week automatically.";
+  else si.textContent="Skip: carries once. Twice \u2192 Parking Lot.";
+  body.appendChild(si);
+
+  var sb=document.createElement("button");sb.className="skip-btn";sb.textContent=isSkip?"undo skip":"skip today";
+  sb.onclick=function(e){e.stopPropagation();if(isSkip){S.checked[task.id]="";save();render();}else{handleSkip(task);}};
+  body.appendChild(sb);
+
+  var dots=document.createElement("div");dots.className="tdots";dots.textContent="\u2022\u2022\u2022";
+  dots.onclick=function(e){e.stopPropagation();S.openMenu=isMenuOpen?null:task.id;render();};
+
+  card.appendChild(chk);card.appendChild(body);card.appendChild(dots);
+
+  if(isMenuOpen){
+    var menu=document.createElement("div");menu.className="task-menu";
+    var menuItems=[
+      {icon:"\u270E",label:"Edit task",cls:"",fn:function(){
+        S.openMenu=null;
+        S.editModal={id:task.id,name:task.name,action:task.action||"",time:task.time||"",cat:task.cat,seed:task.seed,xp:xpAmt,depth:task.depth||"shallow",isCustom:!!task.custom};
+        render();
+      }},
+      {icon:"\u2295",label:"Duplicate",cls:"",fn:function(){
+        S.openMenu=null;var k="w"+S.week;if(!S.customTasks[k])S.customTasks[k]=[];
+        S.customTasks[k].push(Object.assign({},task,{id:uid(),name:task.name+" (copy)",custom:true}));
+        save();render();
+      }},
+      {icon:"\u2192",label:"To Parking Lot",cls:"",fn:function(){
+        S.openMenu=null;S.parkingLot.push({id:uid(),name:task.name,from:"Moved from Week "+S.week,type:"idea"});
+        S.deletedIds[task.id]=true;save();render();
+      }},
+      {icon:"\u00d7",label:"Delete task",cls:"danger",fn:function(){
+        S.openMenu=null;S.deletedIds[task.id]=true;
+        if(S.checked[task.id]==="done")S.xp=Math.max(0,S.xp-xpAmt);
+        delete S.checked[task.id];save();render();
+      }}
+    ];
+    menuItems.forEach(function(item){
+      var mi=document.createElement("div");mi.className="mi"+(item.cls?" "+item.cls:"");
+      mi.innerHTML='<span class="mi-icon">'+item.icon+'</span>'+item.label;
+      mi.onclick=item.fn;menu.appendChild(mi);
+    });
+    card.appendChild(menu);
+  }
+  return card;
+}
+
+function renderModal(app, type){
+  var m=type==="edit"?S.editModal:S.addModal;
+  var overlay=document.createElement("div");overlay.className="modal-overlay";
+  var modal=document.createElement("div");modal.className="modal";
+  modal.innerHTML='<div class="modal-title">'+(type==="edit"?"Edit task":"Add task")+'</div>';
+
+  var fields=type==="edit"
+    ? [
+        {label:"Task name",type:"textarea",key:"name",rows:2},
+        {label:"Action description",type:"textarea",key:"action",rows:3},
+        {label:"Time commitment",type:"input",key:"time"},
+        {label:"Category",type:"select",key:"cat",opts:CATS},
+        {label:"Seed or system",type:"input",key:"seed"},
+        {label:"Work depth",type:"select",key:"depth",opts:["deep","shallow"]},
+        {label:"XP value",type:"number",key:"xp"}
+      ]
+    : [
+        {label:"Task name",type:"textarea",key:"name",rows:2},
+        {label:"Action description (optional)",type:"textarea",key:"action",rows:2,ph:"What exactly do you do?"},
+        {label:"Time commitment",type:"input",key:"time",ph:"e.g. 25 min"},
+        {label:"Category",type:"select",key:"cat",opts:CATS},
+        {label:"Building toward",type:"input",key:"seed",ph:"e.g. Seed 6, System, Life"},
+        {label:"Work depth",type:"select",key:"depth",opts:["shallow","deep"]}
+      ];
+
+  var inputs={};
+  fields.forEach(function(f){
+    var lbl=document.createElement("div");lbl.className="m-lbl";lbl.textContent=f.label;modal.appendChild(lbl);
+    var inp;
+    if(f.type==="textarea"){
+      inp=document.createElement("textarea");inp.rows=f.rows||2;
+      if(f.ph) inp.placeholder=f.ph;
+    } else if(f.type==="select"){
+      inp=document.createElement("select");
+      (f.opts||[]).forEach(function(o){
+        var opt=document.createElement("option");opt.value=o;opt.textContent=o;
+        if(m&&m[f.key]===o) opt.selected=true;
+        else if(!m&&o==="Custom") opt.selected=true;
+        inp.appendChild(opt);
+      });
+    } else {
+      inp=document.createElement("input");inp.type=f.type||"text";
+      if(f.ph) inp.placeholder=f.ph;
+    }
+    inp.className=f.type==="select"?"m-sel":"m-inp";
+    if(f.type!=="select"&&m) inp.value=m[f.key]||"";
+    inputs[f.key]=inp;modal.appendChild(inp);
+  });
+
+  var btnRow=document.createElement("div");btnRow.className="m-row";
+  var cancel=document.createElement("button");cancel.className="m-btn cancel";cancel.textContent="Cancel";
+  cancel.onclick=function(){if(type==="edit")S.editModal=null;else S.addModal=null;render();};
+
+  var saveB=document.createElement("button");saveB.className="m-btn save";
+  saveB.textContent=type==="edit"?"Save changes":"Add task";
+  saveB.onclick=function(){
+    if(type==="edit"){
+      var updates={
+        name:inputs.name.value.trim()||m.name,
+        action:inputs.action.value.trim(),
+        time:inputs.time.value.trim()||m.time,
+        cat:inputs.cat.value,
+        seed:inputs.seed.value.trim()||m.seed,
+        depth:inputs.depth.value,
+        xp:Math.max(5,parseInt(inputs.xp.value)||m.xp)
+      };
+      if(m.isCustom){
+        Object.keys(S.customTasks).forEach(function(k){
+          S.customTasks[k]=S.customTasks[k].map(function(t){return t.id===m.id?Object.assign({},t,updates):t;});
+        });
+      } else {
+        S.overrides[m.id]=updates;
+      }
+      S.editModal=null;
+    } else {
+      var v=inputs.name.value.trim();
+      if(!v){S.addModal=null;render();return;}
+      var k="w"+S.week;if(!S.customTasks[k])S.customTasks[k]=[];
+      S.customTasks[k].push({
+        id:uid(),
+        cat:inputs.cat.value||"Custom",
+        seed:inputs.seed?inputs.seed.value.trim()||"Custom":"Custom",
+        name:v,
+        action:inputs.action?inputs.action.value.trim():"",
+        time:inputs.time?inputs.time.value.trim()||"?":"?",
+        xp:XM[inputs.cat.value]||10,
+        depth:inputs.depth?inputs.depth.value||"shallow":"shallow",
+        custom:true
+      });
+      S.addModal=null;
+    }
+    save();render();
+  };
+
+  btnRow.appendChild(cancel);btnRow.appendChild(saveB);modal.appendChild(btnRow);
+  overlay.appendChild(modal);
+  overlay.onclick=function(e){if(e.target===overlay){if(type==="edit")S.editModal=null;else S.addModal=null;render();}};
+  app.appendChild(overlay);
+}
+
+// INIT
+load();
+var t2=new Date().toDateString();
+var y2=new Date();y2.setDate(y2.getDate()-1);
+if(S.lastDate===y2.toDateString()){S.streak++;}
+else if(S.lastDate!==t2&&S.lastDate){S.streak=1;}
+else if(!S.lastDate){S.streak=1;}
+S.lastDate=t2;
+save();
+render();
+</script>
+</body>
+</html>
