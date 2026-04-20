@@ -315,6 +315,53 @@ input,textarea,select{font-family:inherit}
 .fv-text{flex:1;font-size:12px;color:#85B7EB;line-height:1.55}
 .fv-dismiss{font-size:18px;color:#378ADD;cursor:pointer;flex-shrink:0;line-height:1;padding:0 2px;-webkit-tap-highlight-color:transparent}
 
+
+/* ── TIME RECOGNITION SYSTEM ── */
+.eod-setup{background:var(--bg2);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:10px}
+.eod-setup-lbl{font-size:12px;color:var(--text2);flex:1}
+.eod-setup-lbl span{color:var(--gold);font-weight:500}
+.eod-time-inp{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:5px 9px;font-size:13px;color:var(--text);width:90px;text-align:center}
+.eod-time-inp:focus{outline:none;border-color:var(--gold)}
+.eod-confirm-btn{padding:5px 12px;background:var(--gold);color:#1A1200;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+
+.focus-banner{margin:10px 16px 0;background:linear-gradient(135deg,rgba(127,119,221,0.12),rgba(127,119,221,0.06));border:1px solid rgba(127,119,221,0.35);border-radius:12px;padding:12px 14px}
+.focus-banner-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.focus-banner-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#AFA9EC}
+.focus-time-left{font-size:10px;color:var(--text3)}
+.focus-task-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;line-height:1.35}
+.focus-task-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.focus-task-time{font-size:11px;color:var(--gold);font-weight:500}
+.focus-task-cat{font-size:10px;color:var(--text3)}
+.focus-start-btn{width:100%;padding:9px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:9px;-webkit-tap-highlight-color:transparent}
+.focus-none{font-size:12px;color:var(--text3);font-style:italic}
+
+.time-view-wrap{margin:10px 16px 0}
+.time-view-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tvt-left{display:flex;align-items:center;gap:8px}
+.tvt-clock{font-size:12px;color:var(--text2)}
+.tvt-summary{font-size:12px;color:var(--text2)}
+.tvt-summary span{color:var(--gold);font-weight:500}
+.tvt-chevron{font-size:11px;color:var(--text3);transition:transform 0.2s}
+.tvt-chevron.open{transform:rotate(180deg)}
+.time-view-panel{background:var(--bg2);border:1px solid var(--border);border-radius:0 0 9px 9px;border-top:none;overflow:hidden}
+.tv-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border)}
+.tv-row:last-child{border-bottom:none}
+.tv-lbl{font-size:11px;color:var(--text3)}
+.tv-val{font-size:12px;font-weight:500;color:var(--text)}
+.tv-val.good{color:var(--teal)}
+.tv-val.warn{color:var(--amber)}
+.tv-val.danger{color:var(--red)}
+.tv-realloc-section{padding:8px 12px;border-top:1px solid var(--border)}
+.tv-realloc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:5px}
+.tv-realloc-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:var(--text2)}
+.tv-realloc-dot{width:5px;height:5px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.tv-realloc-dest{font-size:10px;color:var(--text3);margin-left:auto}
+
+.task-wont-reach{opacity:0.5}
+.task-wont-reach .task-name{color:var(--text3)}
+.chip-wont-reach{font-size:9px;color:#F09595;font-weight:700;background:var(--redbg);padding:2px 6px;border-radius:20px;border:1px solid rgba(226,75,74,0.25);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.chip-recommended{font-size:9px;color:#AFA9EC;font-weight:700;background:var(--purplebg);padding:2px 6px;border-radius:20px;border:1px solid rgba(127,119,221,0.3);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+
 </style>
 </head>
 <body>
@@ -632,6 +679,9 @@ function renderToday(app){
   sbar.innerHTML='<span class="streak-num">'+S.streak+'</span><span class="streak-lbl">day streak</span><div class="s-dots">'+dots+'</div>';
   app.appendChild(sbar);
 
+  // EOD setup row (shows until confirmed each morning)
+  renderEODSetup(app);
+
   // Energy
   var erow=document.createElement("div");erow.className="energy-row";
   ["Low","Medium","High"].forEach(function(e){
@@ -673,6 +723,18 @@ function renderToday(app){
   var prow=document.createElement("div");prow.className="prog-row";
   prow.innerHTML='<div class="prog-track"><div class="prog-fill" style="width:'+pp+'%"></div></div><div class="prog-num">'+done+' / '+tasks.length+(skipped>0?" \u00b7 "+skipped+" skipped":"")+'</div>';
   app.appendChild(prow);
+
+  // Run end-of-day reallocation check
+  runEndOfDayRealloc(tasks);
+
+  // Apply time-based ordering to tasks
+  tasks=applyTimeOrdering(tasks);
+
+  // Focus Now banner
+  renderFocusBanner(app,tasks);
+
+  // Time view panel
+  renderTimeView(app,tasks);
 
   // Day planner
   var totalMin=tasks.reduce(function(a,t){
@@ -1011,7 +1073,7 @@ function makeCard(task){
   var isMenuOpen=S.openMenu===task.id;
 
   var card=document.createElement("div");
-  card.className="task-item"+(isDone?" comp":"")+(isSkip?" skip-state":"")+(task.carried?" carried":"");
+  card.className="task-item"+(isDone?" comp":"")+(isSkip?" skip-state":"")+(task.carried?" carried":"")+(task._wontReach&&!isDone&&!isSkip?" task-wont-reach":"");
 
   var chk=document.createElement("div");chk.className="chk"+(isDone?" done":"")+(isSkip?" sk":"");
   chk.textContent=isDone?"\u2713":(isSkip?"\u00d7":"");
@@ -1044,6 +1106,8 @@ function makeCard(task){
   chips.appendChild(cc);chips.appendChild(sc);chips.appendChild(tc);chips.appendChild(xc);chips.appendChild(bc);
   if(task.quick){var qc=document.createElement("span");qc.className="c-quick";qc.textContent="quick win";chips.appendChild(qc);}
   if(task.carried){var crc=document.createElement("span");crc.className="c-carry";crc.textContent="carried";chips.appendChild(crc);}
+  if(task._recommended&&!task.carried){var rcc=document.createElement("span");rcc.className="chip-recommended";rcc.textContent="today";chips.appendChild(rcc);}
+  if(task._wontReach){var wrc=document.createElement("span");wrc.className="chip-wont-reach";wrc.textContent="won't reach";chips.appendChild(wrc);}
 
   body.appendChild(nm);body.appendChild(chips);
   if(task.action){var act=document.createElement("div");act.className="task-action";act.textContent=task.action;body.appendChild(act);}
@@ -1197,6 +1261,301 @@ function renderModal(app, type){
 }
 
 
+
+// ══════════════════════════════════════════
+// TIME RECOGNITION SYSTEM
+// ══════════════════════════════════════════
+
+function initTimeState(){
+  if(!S.hasOwnProperty("eodDefault")) S.eodDefault="21:00";
+  if(!S.hasOwnProperty("eodToday")) S.eodToday=null;
+  if(!S.hasOwnProperty("eodConfirmedDate")) S.eodConfirmedDate=null;
+  if(!S.hasOwnProperty("timeViewOpen")) S.timeViewOpen=false;
+  if(!S.hasOwnProperty("lastRealloc")) S.lastRealloc=null;
+}
+
+function getEOD(){
+  var today=new Date().toDateString();
+  if(S.eodConfirmedDate===today&&S.eodToday) return S.eodToday;
+  return S.eodDefault;
+}
+
+function parseTime(str){
+  // "21:00" or "9:00pm" → minutes since midnight
+  str=(str||"").trim().toLowerCase();
+  var ampm=str.includes("pm")||str.includes("am");
+  str=str.replace(/[apm]/g,"").trim();
+  var parts=str.split(":");
+  var h=parseInt(parts[0])||0;
+  var m=parseInt(parts[1])||0;
+  if(ampm&&str.includes("pm")&&h<12) h+=12;
+  if(ampm&&str.includes("am")&&h===12) h=0;
+  return h*60+m;
+}
+
+function formatMinutes(mins){
+  if(mins<=0) return "0 min";
+  if(mins<60) return Math.round(mins)+" min";
+  var h=Math.floor(mins/60);var m=Math.round(mins%60);
+  return m>0?h+"h "+m+"m":h+"h";
+}
+
+function getNow(){
+  var now=new Date();
+  return now.getHours()*60+now.getMinutes();
+}
+
+function getMinutesLeft(){
+  var eodMins=parseTime(getEOD());
+  var nowMins=getNow();
+  return Math.max(0,eodMins-nowMins);
+}
+
+function getTaskMinRange(task){
+  var t=task.time||"15 min";
+  var cleaned=t.replace(" min","");
+  var parts=cleaned.split("-");
+  var lo=parseInt(parts[0])||15;
+  var hi=parts[1]?parseInt(parts[1]):lo;
+  return {lo:lo,hi:hi,mid:Math.round((lo+hi)/2)};
+}
+
+function getDayPhase(){
+  var h=new Date().getHours();
+  if(h<10) return "morning";
+  if(h<14) return "midday";
+  if(h<18) return "afternoon";
+  return "evening";
+}
+
+function getTaskPriority(task,minsLeft,phase){
+  var status=S.checked[task.id]||"";
+  if(status==="done"||status==="skip") return -1; // already handled
+  var range=getTaskMinRange(task);
+  if(range.lo>minsLeft) return -2; // won't fit
+  var score=0;
+  if(task.mvd) score+=100;
+  if(task.carried) score+=50;
+  if(task.depth==="deep"&&(phase==="morning"||phase==="midday")) score+=40;
+  if(task.depth==="shallow"&&(phase==="afternoon"||phase==="evening")) score+=30;
+  if(task.quick) score+=20;
+  if(task.cat==="Routine") score+=15;
+  if(task.cat==="Life") score-=5;
+  score-=range.mid; // shorter tasks score slightly higher when time is tight
+  return score;
+}
+
+function getRecommendedStack(tasks,minsLeft){
+  var phase=getDayPhase();
+  var pending=tasks.filter(function(t){
+    var s=S.checked[t.id]||"";return s!==" done"&&s!=="done"&&s!=="skip";
+  });
+  var scored=pending.map(function(t){
+    return {task:t,score:getTaskPriority(t,minsLeft,phase),range:getTaskMinRange(t)};
+  });
+  scored.sort(function(a,b){return b.score-a.score;});
+
+  var fits=[],wontReach=[];
+  var budget=minsLeft;
+  scored.forEach(function(s){
+    if(s.score===-1) return; // done/skip
+    if(s.score===-2||s.range.lo>budget){
+      wontReach.push(s.task);
+    } else {
+      fits.push(s.task);
+      budget-=s.range.mid;
+    }
+  });
+  return {fits:fits,wontReach:wontReach,phase:phase};
+}
+
+function getReallocationDest(task){
+  var rule=task.skipRule||SR[task.cat]||"nc";
+  if(rule==="nc") return "released — no carry";
+  if(rule==="co"){
+    var count=S.skipCounts[task.id]||0;
+    return count>=1?"→ Parking Lot":"→ next week";
+  }
+  return "→ next week";
+}
+
+function runEndOfDayRealloc(tasks){
+  var today=new Date().toDateString();
+  if(S.lastRealloc===today) return; // already ran today
+  var minsLeft=getMinutesLeft();
+  if(minsLeft>5) return; // not end of day yet
+  
+  var pending=tasks.filter(function(t){
+    var s=S.checked[t.id]||"";return s!=="done"&&s!=="skip";
+  });
+  pending.forEach(function(task){
+    handleSkip(task); // reuse existing skip logic
+  });
+  S.lastRealloc=today;
+  save();
+}
+
+// ── EOD SETUP ROW (shows each morning until confirmed) ──
+function renderEODSetup(app){
+  var today=new Date().toDateString();
+  if(S.eodConfirmedDate===today) return; // already confirmed today
+
+  var row=document.createElement("div");row.className="eod-setup";
+  var lbl=document.createElement("div");lbl.className="eod-setup-lbl";
+  lbl.innerHTML='Stop today at <span id="eod-display">'+getEOD()+'</span>';
+
+  var inp=document.createElement("input");inp.className="eod-time-inp";inp.type="time";
+  inp.value=getEOD();
+  inp.onchange=function(){
+    S.eodToday=inp.value;
+    var disp=document.getElementById("eod-display");
+    if(disp) disp.textContent=inp.value;
+    save();
+  };
+
+  var btn=document.createElement("button");btn.className="eod-confirm-btn";btn.textContent="Confirm";
+  btn.onclick=function(){
+    S.eodToday=inp.value||S.eodDefault;
+    S.eodConfirmedDate=today;
+    save();render();
+  };
+
+  row.appendChild(lbl);row.appendChild(inp);row.appendChild(btn);
+  app.appendChild(row);
+}
+
+// ── FOCUS NOW BANNER ──
+function renderFocusBanner(app,tasks){
+  var minsLeft=getMinutesLeft();
+  var rec=getRecommendedStack(tasks,minsLeft);
+  var nextTask=rec.fits[0]||null;
+
+  var now=new Date();
+  var timeStr=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
+
+  var banner=document.createElement("div");banner.className="focus-banner";
+  var hdr=document.createElement("div");hdr.className="focus-banner-hdr";
+  hdr.innerHTML='<span class="focus-banner-label">&#9654; Focus now</span><span class="focus-time-left">'+timeStr+' &nbsp;&middot;&nbsp; '+formatMinutes(minsLeft)+' left</span>';
+  banner.appendChild(hdr);
+
+  if(!nextTask){
+    var none=document.createElement("div");none.className="focus-none";
+    none.textContent=minsLeft<=0?"End of day reached — anything remaining will carry forward.":"All tasks done or no tasks fit the remaining time.";
+    banner.appendChild(none);
+  } else {
+    var range=getTaskMinRange(nextTask);
+    var bs=CS[nextTask.cat]||CS.Custom;
+    var tn=document.createElement("div");tn.className="focus-task-name";tn.textContent=nextTask.name;
+    var meta=document.createElement("div");meta.className="focus-task-meta";
+    meta.innerHTML='<span class="focus-task-time">'+nextTask.time+'</span>'
+      +'<span class="focus-task-cat" style="color:'+bs.t+'">'+nextTask.cat+'</span>'
+      +(nextTask.quick?'<span style="font-size:10px;color:var(--teal)">quick win</span>':'');
+    var startBtn=document.createElement("button");startBtn.className="focus-start-btn";
+    startBtn.textContent="Mark this one done when finished";
+    startBtn.onclick=function(){
+      var prev=getLvl().lvl;
+      var xpAmt=nextTask.xp||(XM[nextTask.cat]||10);
+      S.checked[nextTask.id]="done";S.xp+=xpAmt;
+      var now2=getLvl();if(now2.lvl>prev){S.showLU=true;S.luData=now2;}
+      save();render();
+    };
+    banner.appendChild(tn);banner.appendChild(meta);banner.appendChild(startBtn);
+  }
+  app.appendChild(banner);
+}
+
+// ── TIME VIEW PANEL ──
+function renderTimeView(app,tasks){
+  var minsLeft=getMinutesLeft();
+  var rec=getRecommendedStack(tasks,minsLeft);
+  var eod=getEOD();
+  var projectedMins=rec.fits.reduce(function(a,t){return a+getTaskMinRange(t).mid;},0);
+  var nowMins=getNow();
+  var projFinish=nowMins+projectedMins;
+  var projH=Math.floor(projFinish/60)%24;
+  var projM=projFinish%60;
+  var projStr=projH.toString().padStart(2,"0")+":"+projM.toString().padStart(2,"0");
+
+  var fitCount=rec.fits.length;
+  var wontCount=rec.wontReach.length;
+
+  var wrap=document.createElement("div");wrap.className="time-view-wrap";
+  var toggle=document.createElement("div");toggle.className="time-view-toggle";
+
+  var statusColor=minsLeft>120?"var(--teal)":minsLeft>45?"var(--amber)":"var(--red)";
+  toggle.innerHTML='<div class="tvt-left">'
+    +'<span class="tvt-clock" style="color:'+statusColor+'">&#9201;</span>'
+    +'<span class="tvt-summary">'+formatMinutes(minsLeft)+' left &nbsp;&middot;&nbsp; <span>'+fitCount+' tasks fit</span>'+(wontCount>0?', '+wontCount+' flagged':'')+'</span>'
+    +'</div>'
+    +'<span class="tvt-chevron'+(S.timeViewOpen?" open":"")+'">&#9660;</span>';
+  toggle.onclick=function(){S.timeViewOpen=!S.timeViewOpen;save();renderTimeView(app,tasks);};
+  // replace existing time view if already rendered
+  wrap.appendChild(toggle);
+
+  if(S.timeViewOpen){
+    var panel=document.createElement("div");panel.className="time-view-panel";
+
+    var rows=[
+      {lbl:"Current time",val:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),cls:""},
+      {lbl:"End of day",val:eod,cls:""},
+      {lbl:"Time remaining",val:formatMinutes(minsLeft),cls:minsLeft>120?"good":minsLeft>45?"warn":"danger"},
+      {lbl:"Tasks that fit",val:fitCount+" tasks",cls:fitCount>0?"good":"warn"},
+      {lbl:"Projected finish",val:projFinish>parseTime(eod)?"After end of day":projStr,cls:projFinish<=parseTime(eod)?"good":"warn"},
+    ];
+    rows.forEach(function(r){
+      var row=document.createElement("div");row.className="tv-row";
+      row.innerHTML='<span class="tv-lbl">'+r.lbl+'</span><span class="tv-val '+r.cls+'">'+r.val+'</span>';
+      panel.appendChild(row);
+    });
+
+    if(wontCount>0){
+      var rs=document.createElement("div");rs.className="tv-realloc-section";
+      var rl=document.createElement("div");rl.className="tv-realloc-lbl";
+      rl.textContent="Won't reach today — will carry forward at end of day";
+      rs.appendChild(rl);
+      rec.wontReach.forEach(function(t){
+        var item=document.createElement("div");item.className="tv-realloc-item";
+        var dest=getReallocationDest(t);
+        item.innerHTML='<div class="tv-realloc-dot"></div>'
+          +'<span>'+t.name+'</span>'
+          +'<span class="tv-realloc-dest">'+dest+'</span>';
+        rs.appendChild(item);
+      });
+      panel.appendChild(rs);
+    }
+
+    wrap.appendChild(panel);
+  }
+  app.appendChild(wrap);
+}
+
+// ── SMART TASK REORDERING ──
+function applyTimeOrdering(tasks){
+  var minsLeft=getMinutesLeft();
+  var rec=getRecommendedStack(tasks,minsLeft);
+  var fitIds=rec.fits.map(function(t){return t.id;});
+  var wontIds=rec.wontReach.map(function(t){return t.id;});
+
+  // Tag tasks
+  tasks.forEach(function(t){
+    t._recommended=fitIds.indexOf(t.id)>-1;
+    t._wontReach=wontIds.indexOf(t.id)>-1;
+    t._fitRank=fitIds.indexOf(t.id);
+  });
+
+  // Sort: recommended first (by fitRank), then won't-reach at bottom
+  tasks.sort(function(a,b){
+    var aS=S.checked[a.id]||"";var bS=S.checked[b.id]||"";
+    var aDone=aS==="done"||aS==="skip";var bDone=bS==="done"||bS==="skip";
+    if(aDone&&!bDone) return 1;if(!aDone&&bDone) return -1;
+    if(a._recommended&&!b._recommended) return -1;
+    if(!a._recommended&&b._recommended) return 1;
+    if(a._recommended&&b._recommended) return a._fitRank-b._fitRank;
+    return 0;
+  });
+  return tasks;
+}
+
 // ══════════════════════════════════════════
 // ONBOARDING SYSTEM
 // ══════════════════════════════════════════
@@ -1262,6 +1621,7 @@ var FV_NOTES={
 // S.fvSeen          - object (tab: bool)
 
 function initOnboardingState(){
+  initTimeState();
   if(!S.hasOwnProperty("onboardingDone")) S.onboardingDone=false;
   if(!S.hasOwnProperty("helpOpen")) S.helpOpen=false;
   if(!S.hasOwnProperty("helpTab")) S.helpTab="today";
