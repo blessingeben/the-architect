@@ -336,14 +336,11 @@ input,textarea,select{font-family:inherit}
 .focus-none{font-size:12px;color:var(--text3);font-style:italic}
 
 .time-view-wrap{margin:10px 16px 0}
-.time-view-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.tvt-left{display:flex;align-items:center;gap:8px}
-.tvt-clock{font-size:12px;color:var(--text2)}
-.tvt-summary{font-size:12px;color:var(--text2)}
-.tvt-summary span{color:var(--gold);font-weight:500}
-.tvt-chevron{font-size:11px;color:var(--text3);transition:transform 0.2s}
-.tvt-chevron.open{transform:rotate(180deg)}
-.time-view-panel{background:var(--bg2);border:1px solid var(--border);border-radius:0 0 9px 9px;border-top:none;overflow:hidden}
+.time-view-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.time-view-title{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
+.time-view-total{font-size:10px;color:var(--text3)}
+.time-view-toggle{font-size:10px;color:var(--blue);cursor:pointer;padding:2px 6px;-webkit-tap-highlight-color:transparent}
+.time-view-blocks{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .tv-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border)}
 .tv-row:last-child{border-bottom:none}
 .tv-lbl{font-size:11px;color:var(--text3)}
@@ -356,7 +353,6 @@ input,textarea,select{font-family:inherit}
 .tv-realloc-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:var(--text2)}
 .tv-realloc-dot{width:5px;height:5px;border-radius:50%;background:var(--amber);flex-shrink:0}
 .tv-realloc-dest{font-size:10px;color:var(--text3);margin-left:auto}
-
 .task-wont-reach{opacity:0.5}
 .task-wont-reach .task-name{color:var(--text3)}
 .task-blocked{opacity:0.4}
@@ -1900,46 +1896,57 @@ function renderTimeView(app,tasks){
   var nowMins=getNow();
   var projFinish=nowMins+projectedMins;
   var projH=Math.floor(projFinish/60)%24;
-  var projM=projFinish%60;
+  var projM=Math.round(projFinish%60);
   var projStr=projH.toString().padStart(2,"0")+":"+projM.toString().padStart(2,"0");
-
   var fitCount=rec.fits.length;
   var wontCount=rec.wontReach.length;
   var blockedCount=rec.blocked?rec.blocked.length:0;
-
-  var wrap=document.createElement("div");wrap.className="time-view-wrap";
-  var toggle=document.createElement("div");toggle.className="time-view-toggle";
-
   var statusColor=minsLeft>120?"var(--teal)":minsLeft>45?"var(--amber)":"var(--red)";
-  toggle.innerHTML='<div class="tvt-left">'
-    +'<span class="tvt-clock" style="color:'+statusColor+'">&#9201;</span>'
-    +'<span class="tvt-summary">'+formatMinutes(minsLeft)+' left &nbsp;&middot;&nbsp; <span>'+fitCount+' fit</span>'+(wontCount>0?', '+wontCount+' later':'')+(blockedCount>0?', '+blockedCount+' blocked':'')+'</span>'
-    +'</div>'
-    +'<span class="tvt-chevron'+(S.timeViewOpen?" open":"")+'">&#9660;</span>';
-  toggle.onclick=function(){S.timeViewOpen=!S.timeViewOpen;save();renderTimeView(app,tasks);};
-  // replace existing time view if already rendered
-  wrap.appendChild(toggle);
 
+  // Matches planner-wrap pattern exactly
+  var wrap=document.createElement("div");wrap.className="time-view-wrap";
+
+  // Header — same structure as planner-hdr
+  var ph=document.createElement("div");ph.className="time-view-hdr";
+
+  var titleEl=document.createElement("span");titleEl.className="time-view-title";
+  titleEl.innerHTML='<span style="color:'+statusColor+'">&#9201;</span> '+formatMinutes(minsLeft)+' remaining';
+
+  var summaryEl=document.createElement("span");summaryEl.className="time-view-total";
+  summaryEl.textContent=fitCount+' fit'
+    +(wontCount>0?' · '+wontCount+' later':'')
+    +(blockedCount>0?' · '+blockedCount+' blocked':'');
+
+  var toggleBtn=document.createElement("span");toggleBtn.className="time-view-toggle";
+  toggleBtn.textContent=S.timeViewOpen?"hide ▲":"show ▼";
+  toggleBtn.onclick=function(){S.timeViewOpen=!S.timeViewOpen;save();render();};
+
+  ph.appendChild(titleEl);ph.appendChild(summaryEl);ph.appendChild(toggleBtn);
+  wrap.appendChild(ph);
+
+  // Collapsible blocks — same class structure as planner-blocks
   if(S.timeViewOpen){
-    var panel=document.createElement("div");panel.className="time-view-panel";
+    var blocks=document.createElement("div");blocks.className="time-view-blocks";
 
+    // Stats rows
     var rows=[
       {lbl:"Current time",val:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),cls:""},
       {lbl:"End of day",val:eod,cls:""},
       {lbl:"Time remaining",val:formatMinutes(minsLeft),cls:minsLeft>120?"good":minsLeft>45?"warn":"danger"},
-      {lbl:"Tasks that fit",val:fitCount+" tasks",cls:fitCount>0?"good":"warn"},
-      {lbl:"Projected finish",val:projFinish>parseTime(eod)?"After end of day":projStr,cls:projFinish<=parseTime(eod)?"good":"warn"},
+      {lbl:"Tasks that fit today",val:fitCount+" tasks",cls:fitCount>0?"good":"warn"},
+      {lbl:"Projected finish",val:projFinish>parseTime(eod)?"After end of day":projStr,cls:projFinish<=parseTime(eod)?"good":"warn"}
     ];
     rows.forEach(function(r){
       var row=document.createElement("div");row.className="tv-row";
       row.innerHTML='<span class="tv-lbl">'+r.lbl+'</span><span class="tv-val '+r.cls+'">'+r.val+'</span>';
-      panel.appendChild(row);
+      blocks.appendChild(row);
     });
 
+    // Won't reach section
     if(wontCount>0){
       var rs=document.createElement("div");rs.className="tv-realloc-section";
       var rl=document.createElement("div");rl.className="tv-realloc-lbl";
-      rl.textContent="Won't reach today — carries forward at end of day";
+      rl.textContent="Won’t reach today — carries forward at end of day";
       rs.appendChild(rl);
       rec.wontReach.forEach(function(t){
         var item=document.createElement("div");item.className="tv-realloc-item";
@@ -1949,8 +1956,10 @@ function renderTimeView(app,tasks){
           +'<span class="tv-realloc-dest">'+dest+'</span>';
         rs.appendChild(item);
       });
-      panel.appendChild(rs);
+      blocks.appendChild(rs);
     }
+
+    // Blocked section
     if(blockedCount>0){
       var bs2=document.createElement("div");bs2.className="tv-realloc-section";
       var bl=document.createElement("div");bl.className="tv-realloc-lbl";
@@ -1958,19 +1967,20 @@ function renderTimeView(app,tasks){
       bs2.appendChild(bl);
       rec.blocked.forEach(function(t){
         var item=document.createElement("div");item.className="tv-realloc-item";
-        var blockers=getBlockingTasks(t.id);
+        var blockers=getBlockingTasks(t);
         item.innerHTML='<div class="tv-realloc-dot" style="background:var(--text3)"></div>'
           +'<span style="color:var(--text3)">'+t.name+'</span>'
           +'<span class="tv-realloc-dest">'+(blockers.length>0?"needs "+blockers.length+" done":"")+'</span>';
         bs2.appendChild(item);
       });
-      panel.appendChild(bs2);
+      blocks.appendChild(bs2);
     }
 
-    wrap.appendChild(panel);
+    wrap.appendChild(blocks);
   }
   app.appendChild(wrap);
 }
+
 
 // ── SMART TASK REORDERING ──
 function applyTimeOrdering(tasks){
