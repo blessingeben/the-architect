@@ -359,6 +359,8 @@ input,textarea,select{font-family:inherit}
 
 .task-wont-reach{opacity:0.5}
 .task-wont-reach .task-name{color:var(--text3)}
+.task-blocked{opacity:0.4}
+.task-blocked .task-name{color:var(--text3)}
 .chip-wont-reach{font-size:9px;color:#F09595;font-weight:700;background:var(--redbg);padding:2px 6px;border-radius:20px;border:1px solid rgba(226,75,74,0.25);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
 .chip-recommended{font-size:9px;color:#AFA9EC;font-weight:700;background:var(--purplebg);padding:2px 6px;border-radius:20px;border:1px solid rgba(127,119,221,0.3);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
 
@@ -782,7 +784,7 @@ function renderToday(app){
   runEndOfDayRealloc(tasks);
 
   // Apply time-based ordering to tasks
-  tasks=applyTimeOrdering(tasks);
+  tasks=applyTimeOrderingV2(tasks);
 
   // Focus Now banner
   renderFocusBanner(app,tasks);
@@ -1359,7 +1361,7 @@ function makeCard(task){
   var isMenuOpen=S.openMenu===task.id;
 
   var card=document.createElement("div");
-  card.className="task-item"+(isDone?" comp":"")+(isSkip?" skip-state":"")+(task.carried?" carried":"")+(task._wontReach&&!isDone&&!isSkip?" task-wont-reach":"");
+  card.className="task-item"+(isDone?" comp":"")+(isSkip?" skip-state":"")+(task.carried?" carried":"")+(task._wontReach&&!isDone&&!isSkip?" task-wont-reach":"")+(task._blocked&&!isDone&&!isSkip?" task-blocked":"");
 
   var chk=document.createElement("div");chk.className="chk"+(isDone?" done":"")+(isSkip?" sk":"");
   chk.textContent=isDone?"\u2713":(isSkip?"\u00d7":"");
@@ -1394,12 +1396,29 @@ function makeCard(task){
   if(task.carried){var crc=document.createElement("span");crc.className="c-carry";crc.textContent="carried";chips.appendChild(crc);}
   if(task._recommended&&!task.carried){var rcc=document.createElement("span");rcc.className="chip-recommended";rcc.textContent="today";chips.appendChild(rcc);}
   if(task._wontReach){var wrc=document.createElement("span");wrc.className="chip-wont-reach";wrc.textContent="won't reach";chips.appendChild(wrc);}
+  if(task._blocked){var blk=document.createElement("span");blk.className="chip-wont-reach";blk.style.background="rgba(96,88,80,0.15)";blk.style.color="#A09890";blk.style.borderColor="rgba(160,152,144,0.25)";blk.textContent="blocked";chips.appendChild(blk);}
+  if(task._arcInfo&&!task._blocked){
+    var arcI=task._arcInfo;
+    var aChip=document.createElement("span");aChip.className="chip";
+    aChip.style.cssText="background:rgba("+hexToRgb(arcI.arcColor)+",0.12);color:"+arcI.arcColor;
+    aChip.textContent="step "+arcI.stepNum+"/"+arcI.totalSteps;
+    chips.appendChild(aChip);
+  }
 
   body.appendChild(nm);body.appendChild(chips);
   if(task.action){var act=document.createElement("div");act.className="task-action";act.textContent=task.action;body.appendChild(act);}
 
   var si=document.createElement("div");si.className="skip-info";
-  if(rule==="nc") si.textContent="Skip: no carry-forward. Never miss twice.";
+  if(task._blocked&&task._blockingTasks&&task._blockingTasks.length>0){
+    // Find names of blocking tasks
+    var allTasks=getWeekTasks(S.week);
+    var blockNames=task._blockingTasks.map(function(bid){
+      var bt=allTasks.find(function(t){return t.id===bid;});
+      return bt?bt.name.substring(0,40)+"\u2026":bid;
+    });
+    si.style.color="#FAC775";
+    si.textContent="\u23f3 Waiting for: "+blockNames.join(", ");
+  } else if(rule==="nc") si.textContent="Skip: no carry-forward. Never miss twice.";
   else if(rule==="c") si.textContent="Skip: carries to next week automatically.";
   else si.textContent="Skip: carries once. Twice \u2192 Parking Lot.";
   body.appendChild(si);
@@ -1716,7 +1735,7 @@ function renderEODSetup(app){
 // ── FOCUS NOW BANNER ──
 function renderFocusBanner(app,tasks){
   var minsLeft=getMinutesLeft();
-  var rec=getRecommendedStack(tasks,minsLeft);
+  var rec=getRecommendedStackV2(tasks,minsLeft);
   var nextTask=rec.fits[0]||null;
 
   var now=new Date();
@@ -1734,11 +1753,33 @@ function renderFocusBanner(app,tasks){
   } else {
     var range=getTaskMinRange(nextTask);
     var bs=CS[nextTask.cat]||CS.Custom;
+    var arcInfo=TASK_ARC_LOOKUP[nextTask.id]||null;
+
+    // Arc progress label
+    if(arcInfo){
+      var arcProg=document.createElement("div");
+      arcProg.style.cssText="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;color:"+arcInfo.arcColor;
+      var ap=getArcProgress(arcInfo.arcId);
+      arcProg.textContent=arcInfo.arcLabel+" · Step "+arcInfo.stepNum+" of "+arcInfo.totalSteps
+        +(ap?" · "+ap.done+"/"+ap.total+" done":"");
+      banner.appendChild(arcProg);
+    }
+
     var tn=document.createElement("div");tn.className="focus-task-name";tn.textContent=nextTask.name;
     var meta=document.createElement("div");meta.className="focus-task-meta";
     meta.innerHTML='<span class="focus-task-time">'+nextTask.time+'</span>'
       +'<span class="focus-task-cat" style="color:'+bs.t+'">'+nextTask.cat+'</span>'
       +(nextTask.quick?'<span style="font-size:10px;color:var(--teal)">quick win</span>':'');
+
+    // What this unlocks
+    var unblocks=Object.entries(TASK_DEPS).filter(function(kv){return kv[1].includes(nextTask.id);});
+    if(unblocks.length>0){
+      var ul=document.createElement("div");
+      ul.style.cssText="font-size:10px;color:var(--teal);margin-top:4px";
+      ul.textContent="✓ Completing this unlocks "+unblocks.length+" task"+(unblocks.length>1?"s":"");
+      meta.appendChild(ul);
+    }
+
     var startBtn=document.createElement("button");startBtn.className="focus-start-btn";
     startBtn.textContent="Mark this one done when finished";
     startBtn.onclick=function(){
@@ -1756,7 +1797,7 @@ function renderFocusBanner(app,tasks){
 // ── TIME VIEW PANEL ──
 function renderTimeView(app,tasks){
   var minsLeft=getMinutesLeft();
-  var rec=getRecommendedStack(tasks,minsLeft);
+  var rec=getRecommendedStackV2(tasks,minsLeft);
   var eod=getEOD();
   var projectedMins=rec.fits.reduce(function(a,t){return a+getTaskMinRange(t).mid;},0);
   var nowMins=getNow();
@@ -1767,6 +1808,7 @@ function renderTimeView(app,tasks){
 
   var fitCount=rec.fits.length;
   var wontCount=rec.wontReach.length;
+  var blockedCount=rec.blocked?rec.blocked.length:0;
 
   var wrap=document.createElement("div");wrap.className="time-view-wrap";
   var toggle=document.createElement("div");toggle.className="time-view-toggle";
@@ -1774,7 +1816,7 @@ function renderTimeView(app,tasks){
   var statusColor=minsLeft>120?"var(--teal)":minsLeft>45?"var(--amber)":"var(--red)";
   toggle.innerHTML='<div class="tvt-left">'
     +'<span class="tvt-clock" style="color:'+statusColor+'">&#9201;</span>'
-    +'<span class="tvt-summary">'+formatMinutes(minsLeft)+' left &nbsp;&middot;&nbsp; <span>'+fitCount+' tasks fit</span>'+(wontCount>0?', '+wontCount+' flagged':'')+'</span>'
+    +'<span class="tvt-summary">'+formatMinutes(minsLeft)+' left &nbsp;&middot;&nbsp; <span>'+fitCount+' fit</span>'+(wontCount>0?', '+wontCount+' later':'')+(blockedCount>0?', '+blockedCount+' blocked':'')+'</span>'
     +'</div>'
     +'<span class="tvt-chevron'+(S.timeViewOpen?" open":"")+'">&#9660;</span>';
   toggle.onclick=function(){S.timeViewOpen=!S.timeViewOpen;save();renderTimeView(app,tasks);};
@@ -1800,7 +1842,7 @@ function renderTimeView(app,tasks){
     if(wontCount>0){
       var rs=document.createElement("div");rs.className="tv-realloc-section";
       var rl=document.createElement("div");rl.className="tv-realloc-lbl";
-      rl.textContent="Won't reach today — will carry forward at end of day";
+      rl.textContent="Won't reach today — carries forward at end of day";
       rs.appendChild(rl);
       rec.wontReach.forEach(function(t){
         var item=document.createElement("div");item.className="tv-realloc-item";
@@ -1812,6 +1854,21 @@ function renderTimeView(app,tasks){
       });
       panel.appendChild(rs);
     }
+    if(blockedCount>0){
+      var bs2=document.createElement("div");bs2.className="tv-realloc-section";
+      var bl=document.createElement("div");bl.className="tv-realloc-lbl";
+      bl.textContent="Blocked — complete their dependency first";
+      bs2.appendChild(bl);
+      rec.blocked.forEach(function(t){
+        var item=document.createElement("div");item.className="tv-realloc-item";
+        var blockers=getBlockingTasks(t.id);
+        item.innerHTML='<div class="tv-realloc-dot" style="background:var(--text3)"></div>'
+          +'<span style="color:var(--text3)">'+t.name+'</span>'
+          +'<span class="tv-realloc-dest">'+(blockers.length>0?"needs "+blockers.length+" done":"")+'</span>';
+        bs2.appendChild(item);
+      });
+      panel.appendChild(bs2);
+    }
 
     wrap.appendChild(panel);
   }
@@ -1821,7 +1878,7 @@ function renderTimeView(app,tasks){
 // ── SMART TASK REORDERING ──
 function applyTimeOrdering(tasks){
   var minsLeft=getMinutesLeft();
-  var rec=getRecommendedStack(tasks,minsLeft);
+  var rec=getRecommendedStackV2(tasks,minsLeft);
   var fitIds=rec.fits.map(function(t){return t.id;});
   var wontIds=rec.wontReach.map(function(t){return t.id;});
 
@@ -1886,6 +1943,237 @@ function getWeekTasks(week){
   return recurring.concat(filtered)
     .concat(carried.map(function(t){return Object.assign({},t,{carried:true});}))
     .concat(custom);
+}
+
+
+// ══════════════════════════════════════════
+// DEPENDENCY + INCREMENTAL TASK SYSTEM
+// ══════════════════════════════════════════
+
+// Hard dependencies: task cannot be recommended until blocker is done
+// Format: { taskId: [blockerId, ...] }
+var TASK_DEPS = {
+  // Pre-Week: clear before build
+  "p23": ["p04"],           // clothes sort needs bins
+  "p24": ["p04"],           // beauty sort needs bins
+  "p06": ["p05"],           // notebook placement needs planner committed
+  "p11": ["p10"],           // build Notes structure on clean slate
+  "p13": ["p12"],           // GTD lists need Reminders cleared
+  "p15": ["p14"],           // Seeds calendar after old calendar cleared
+  "p16": ["p15"],           // unsubscribe after email inventory
+  "p19": ["p18"],           // email folders after inventory (cross-week)
+  "p17": ["p10"],           // Routinery Evening Close needs Morning Anchor built
+
+  // Week 1
+  "w1_07": ["p18"],         // email folders need inventory done
+  "w1_04": ["p23"],         // hang clothes needs clothes sorted first
+  "w1_05": ["w1_04"],       // nightstand clearing after clothes handled
+
+  // Week 2 — desk and GLEAN
+  "w2_05": ["w2_04"],       // decide desk contents only after surface cleared
+  "w2_07": ["w1_09"],       // Case Study context needs outcomes listed
+  "w2_08": ["w1_10"],       // rename GLEAN store after audit done
+  "w2_09": ["w2_08"],       // research cause partners after rebrand decided
+
+  // Week 3
+  "w3_08": ["w2_07"],       // CS gap section needs context section done
+  "w3_09": ["w2_09"],       // contact partner after research done
+
+  // Week 4
+  "w4_07": ["w3_08"],       // CS approach+outcome needs gap section done
+  "w4_08": ["w2_07"],       // identify CS candidates after first CS started
+};
+
+// Incremental arcs: tasks that are steps in the same larger project
+// Format: { arcId: { label, steps: [taskId, ...] } }
+var TASK_ARCS = {
+  "bedroom_clearing": {
+    label: "Bedroom clearing",
+    color: "#F5C842",
+    steps: ["p23","p24","w1_04","w1_05"]
+  },
+  "digital_notes": {
+    label: "Notes setup",
+    color: "#7F77DD",
+    steps: ["p09","p10","p13"]
+  },
+  "digital_reminders": {
+    label: "Reminders setup",
+    color: "#7F77DD",
+    steps: ["p11","p12"]
+  },
+  "digital_calendar": {
+    label: "Calendar setup",
+    color: "#7F77DD",
+    steps: ["p13","p14"]
+  },
+  "digital_email": {
+    label: "Email setup",
+    color: "#378ADD",
+    steps: ["p15","p16","w1_07"]
+  },
+  "routinery_setup": {
+    label: "Routinery setup",
+    color: "#EF9F27",
+    steps: ["p10","p17"]
+  },
+  "case_study_1": {
+    label: "Case Study 1",
+    color: "#7F77DD",
+    steps: ["w1_09","w2_07","w3_08","w4_07"]
+  },
+  "glean_rebrand": {
+    label: "GLEAN rebrand",
+    color: "#EF9F27",
+    steps: ["w1_10","w2_08","w2_09","w3_09"]
+  },
+  "desk_zone": {
+    label: "Desk zone",
+    color: "#1D9E75",
+    steps: ["w2_04","w2_05"]
+  }
+};
+
+// Build reverse arc lookup: taskId → arcInfo
+var TASK_ARC_LOOKUP = {};
+Object.entries(TASK_ARCS).forEach(function(kv) {
+  var arcId = kv[0], arc = kv[1];
+  arc.steps.forEach(function(tid, idx) {
+    TASK_ARC_LOOKUP[tid] = {
+      arcId: arcId,
+      arcLabel: arc.label,
+      arcColor: arc.color,
+      stepNum: idx + 1,
+      totalSteps: arc.steps.length,
+      prevStep: idx > 0 ? arc.steps[idx-1] : null,
+      nextStep: idx < arc.steps.length-1 ? arc.steps[idx+1] : null
+    };
+  });
+});
+
+function isTaskBlocked(taskId) {
+  var blockers = TASK_DEPS[taskId];
+  if (!blockers || blockers.length === 0) return false;
+  return blockers.some(function(bid) {
+    return S.checked[bid] !== "done";
+  });
+}
+
+function getBlockingTasks(taskId) {
+  var blockers = TASK_DEPS[taskId] || [];
+  return blockers.filter(function(bid) {
+    return S.checked[bid] !== "done";
+  });
+}
+
+function getArcProgress(arcId) {
+  var arc = TASK_ARCS[arcId];
+  if (!arc) return null;
+  var done = arc.steps.filter(function(tid) {
+    return S.checked[tid] === "done";
+  }).length;
+  return { done: done, total: arc.steps.length, pct: Math.round((done / arc.steps.length) * 100) };
+}
+
+// ── Enhanced task priority that respects dependencies ──
+function getTaskPriorityV2(task, minsLeft, phase) {
+  var range = getTaskMinRange(task);
+  if (range.lo > minsLeft) return -2; // won't fit
+
+  // Blocked by dependency = cannot do yet
+  if (isTaskBlocked(task.id)) return -3;
+
+  var status = S.checked[task.id] || "";
+  if (status === "done" || status === "skip") return -1;
+
+  var score = 0;
+  if (task.mvd) score += 100;
+  if (task.carried) score += 50;
+  if (task.depth === "deep" && (phase === "morning" || phase === "midday")) score += 40;
+  if (task.depth === "shallow" && (phase === "afternoon" || phase === "evening")) score += 30;
+  if (task.quick) score += 20;
+  if (task.cat === "Routine") score += 15;
+
+  // Boost tasks that unblock others
+  var unblocksCount = Object.entries(TASK_DEPS).filter(function(kv) {
+    return kv[1].includes(task.id);
+  }).length;
+  score += unblocksCount * 25; // tasks that unlock others are high priority
+
+  // Boost tasks that continue an arc already in progress
+  var arcInfo = TASK_ARC_LOOKUP[task.id];
+  if (arcInfo && arcInfo.prevStep && S.checked[arcInfo.prevStep] === "done") {
+    score += 30; // momentum bonus: previous step just done
+  }
+
+  score -= range.mid;
+  return score;
+}
+
+// ── Updated getRecommendedStack using V2 priority ──
+function getRecommendedStackV2(tasks, minsLeft) {
+  var phase = getDayPhase();
+  var pending = tasks.filter(function(t) {
+    var s = S.checked[t.id] || "";
+    return s !== "done" && s !== "skip";
+  });
+
+  var scored = pending.map(function(t) {
+    return { task: t, score: getTaskPriorityV2(t, minsLeft, phase), range: getTaskMinRange(t) };
+  });
+  scored.sort(function(a, b) { return b.score - a.score; });
+
+  var fits = [], wontReach = [], blocked = [], budget = minsLeft;
+  scored.forEach(function(s) {
+    if (s.score === -1) return;
+    if (s.score === -3) { blocked.push(s.task); return; } // dependency blocked
+    if (s.score === -2 || s.range.lo > budget) { wontReach.push(s.task); return; }
+    fits.push(s.task);
+    budget -= s.range.mid;
+  });
+
+  return { fits: fits, wontReach: wontReach, blocked: blocked, phase: phase };
+}
+
+// ── Tag tasks with dependency and arc info ──
+function applyTimeOrderingV2(tasks) {
+  var minsLeft = getMinutesLeft();
+  var rec = getRecommendedStackV2(tasks, minsLeft);
+  var fitIds = rec.fits.map(function(t) { return t.id; });
+  var wontIds = rec.wontReach.map(function(t) { return t.id; });
+  var blockedIds = rec.blocked.map(function(t) { return t.id; });
+
+  tasks.forEach(function(t) {
+    t._recommended = fitIds.indexOf(t.id) > -1;
+    t._wontReach = wontIds.indexOf(t.id) > -1;
+    t._blocked = blockedIds.indexOf(t.id) > -1;
+    t._fitRank = fitIds.indexOf(t.id);
+    t._arcInfo = TASK_ARC_LOOKUP[t.id] || null;
+    t._blockingTasks = getBlockingTasks(t.id);
+  });
+
+  tasks.sort(function(a, b) {
+    var aS = S.checked[a.id] || "", bS = S.checked[b.id] || "";
+    var aDone = aS === "done" || aS === "skip";
+    var bDone = bS === "done" || bS === "skip";
+    if (aDone && !bDone) return 1;
+    if (!aDone && bDone) return -1;
+    if (a._blocked && !b._blocked) return 1;
+    if (!a._blocked && b._blocked) return -1;
+    if (a._recommended && !b._recommended) return -1;
+    if (!a._recommended && b._recommended) return 1;
+    if (a._recommended && b._recommended) return a._fitRank - b._fitRank;
+    return 0;
+  });
+  return tasks;
+}
+
+
+function hexToRgb(hex){
+  var r=parseInt(hex.slice(1,3),16);
+  var g=parseInt(hex.slice(3,5),16);
+  var b=parseInt(hex.slice(5,7),16);
+  return r+","+g+","+b;
 }
 
 // ══════════════════════════════════════════
