@@ -362,6 +362,62 @@ input,textarea,select{font-family:inherit}
 .chip-wont-reach{font-size:9px;color:#F09595;font-weight:700;background:var(--redbg);padding:2px 6px;border-radius:20px;border:1px solid rgba(226,75,74,0.25);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
 .chip-recommended{font-size:9px;color:#AFA9EC;font-weight:700;background:var(--purplebg);padding:2px 6px;border-radius:20px;border:1px solid rgba(127,119,221,0.3);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
 
+
+/* ── SETTINGS SCREEN ── */
+.settings-screen{padding:14px 16px}
+.settings-section{margin-bottom:18px}
+.settings-section-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;padding:0 2px}
+.settings-row{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1px}
+.settings-row:first-of-type{border-radius:10px 10px 0 0}
+.settings-row:last-of-type{border-radius:0 0 10px 10px}
+.settings-row:only-child{border-radius:10px}
+.sr-inner{display:flex;align-items:center;padding:12px 14px;gap:10px}
+.sr-label{flex:1;font-size:13px;color:var(--text)}
+.sr-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.sr-val{font-size:12px;color:var(--text3)}
+.sr-action{font-size:12px;color:var(--blue);cursor:pointer;-webkit-tap-highlight-color:transparent;padding:2px}
+.sr-action.danger{color:#F09595}
+.sr-time-inp{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:5px 9px;font-size:13px;color:var(--text);width:100px;text-align:center}
+.sr-time-inp:focus{outline:none;border-color:var(--gold)}
+.sr-select{background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:5px 9px;font-size:13px;color:var(--text)}
+.settings-danger-btn{width:100%;padding:12px;background:rgba(226,75,74,0.08);color:#F09595;border:1px solid rgba(226,75,74,0.25);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;margin-top:4px;-webkit-tap-highlight-color:transparent}
+.settings-export-btn{width:100%;padding:12px;background:rgba(55,138,221,0.08);color:#85B7EB;border:1px solid rgba(55,138,221,0.25);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:6px;-webkit-tap-highlight-color:transparent}
+.settings-import-label{display:block;width:100%;padding:12px;background:rgba(55,138,221,0.04);color:#85B7EB;border:1px dashed rgba(55,138,221,0.25);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.settings-import-inp{display:none}
+.settings-confirm{background:var(--tealbg);border:1px solid rgba(29,158,117,0.3);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--teal);margin-top:8px;line-height:1.5}
+
+/* ── REVIEW HISTORY ── */
+.review-history{margin-top:14px}
+.rh-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;padding:0 2px}
+.rh-chart{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+.rh-chart-label{font-size:10px;color:var(--text3);margin-bottom:8px}
+.rh-bars{display:flex;align-items:flex-end;gap:4px;height:48px}
+.rh-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.rh-bar{width:100%;border-radius:3px 3px 0 0;transition:height 0.4s;min-height:2px}
+.rh-bar-lbl{font-size:8px;color:var(--text3);white-space:nowrap}
+.rh-entry{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px}
+.rh-entry-hdr{padding:10px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rh-entry-week{font-size:12px;font-weight:500;color:var(--text)}
+.rh-entry-score{font-size:11px;color:var(--gold);font-weight:500}
+.rh-entry-body{padding:0 13px 10px;border-top:1px solid var(--border)}
+.rh-q{margin-top:8px}
+.rh-q-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:3px}
+.rh-q-val{font-size:12px;color:var(--text2);line-height:1.55}
+.rh-empty{font-size:12px;color:var(--text3);font-style:italic;text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px}
+
+/* ── RECURRING TASK CHIP ── */
+.chip-recurring{font-size:9px;color:var(--amber);font-weight:700;background:var(--amberbg);padding:2px 6px;border-radius:20px;border:1px solid rgba(239,159,39,0.25);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+
+/* ── CITY STAGE INDICATORS ── */
+.city-stage-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px}
+.city-stage-pill{border-radius:6px;padding:6px 4px;text-align:center;border:1px solid var(--border)}
+.city-stage-pill.active{border-color:var(--border2)}
+.city-stage-name{font-size:9px;font-weight:500;color:var(--text3);display:block;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.city-stage-pill.active .city-stage-name{color:var(--text2)}
+.city-stage-dots{display:flex;justify-content:center;gap:2px}
+.city-stage-dot{width:4px;height:4px;border-radius:50%;background:var(--bg3)}
+.city-stage-dot.filled{background:var(--gold)}
+
 </style>
 </head>
 <body>
@@ -550,9 +606,12 @@ var S={
   carriedTasks:{},customTasks:{},overrides:{},deletedIds:{},
   bossDone:{},showLU:false,luData:null,
   openMenu:null,editModal:null,addModal:null,
-  reviewData:{},parkingLot:[],reviewSaved:false,
+  reviewData:{},reviewHistory:[],parkingLot:[],reviewSaved:false,
   setupDone:{},setupDismissed:false,
-  plannerOpen:true
+  plannerOpen:true,
+  expandedReviews:{},
+  defaultEnergy:"Medium",
+  settingsMsg:null
 };
 
 function getLvl(){for(var i=LEVELS.length-1;i>=0;i--){if(S.xp>=LEVELS[i].xp)return LEVELS[i];}return LEVELS[0];}
@@ -569,14 +628,7 @@ function save(){
 }
 
 function getBaseTasks(){
-  var base=(TASKS[S.week]||[])
-    .filter(function(t){return!S.deletedIds[t.id];})
-    .map(function(t){return S.overrides[t.id]?Object.assign({},t,S.overrides[t.id]):t;});
-  var carried=(S.carriedTasks[S.week]||[]).filter(function(t){return!S.deletedIds[t.id];});
-  var custom=(S.customTasks["w"+S.week]||[]).filter(function(t){return!S.deletedIds[t.id];});
-  var all=base
-    .concat(carried.map(function(t){return Object.assign({},t,{carried:true});}))
-    .concat(custom);
+  var all=getWeekTasks(S.week);
   if(S.energy==="Low") all=all.filter(function(t){return t.mvd||t.carried;});
   return all;
 }
@@ -641,6 +693,7 @@ function render(){
   else if(S.view==="review"){renderReview(app);renderFVBanner(app,"review");}
   else if(S.view==="vision"){renderVision(app);renderFVBanner(app,"vision");}
   else if(S.view==="parking"){renderParking(app);renderFVBanner(app,"parking");}
+  else if(S.view==="settings") renderSettings(app);
 
   if(S.helpOpen) renderHelpSheet(app);
   buildNav(nav);
@@ -661,7 +714,8 @@ function buildNav(nav){
     {icon:"&#8599;",label:"Boss",v:"boss"},
     {icon:"&#9678;",label:"Review",v:"review"},
     {icon:"&#10022;",label:"Vision",v:"vision"},
-    {icon:"P",label:"Lot",v:"parking"}
+    {icon:"P",label:"Lot",v:"parking"},
+    {icon:"&#9881;",label:"Settings",v:"settings"}
   ];
   items.forEach(function(item){
     var active=S.view===item.v;
@@ -851,58 +905,95 @@ function renderToday(app){
   app.appendChild(arow);
 }
 
+function getDistrictStage(districtIdx){
+  // Returns 0-3: 0=ruins,1=foundation,2=rising,3=complete
+  var unlocked=getUnlocked();
+  if(unlocked.indexOf(districtIdx)===-1) return 0;
+  var distCats=["Work","Business","Creative","Community","",""];
+  var cat=distCats[districtIdx];
+  if(!cat) return 1; // unlocked but no tasks yet = foundation
+  var allDone=0,allTotal=0;
+  ["1","2","3","4"].forEach(function(w){
+    var wt=TASKS[w]||[];
+    var rel=wt.filter(function(t){return t.cat===cat;});
+    allTotal+=rel.length;
+    allDone+=rel.filter(function(t){return S.checked[t.id]==="done";}).length;
+  });
+  if(allTotal===0) return 1;
+  var pct=allDone/allTotal;
+  if(pct>=0.75) return 3;
+  if(pct>=0.4) return 2;
+  return 1;
+}
+
+function buildDistrictSVG(idx,x,color,darkColor,accentColor,stage,label){
+  if(stage===0) return '<g opacity="0.12"><rect x="'+(x)+'" y="120" width="10" height="40" fill="#242433" rx="1"/><rect x="'+(x+14)+'" y="128" width="8" height="32" fill="#1E1E2C" rx="1"/></g>';
+  var baseH=stage>=2?80:60;var towerH=stage>=2?72:52;var accentH=stage>=3?90:baseH;
+  var baseY=160-baseH;var towerY=160-towerH;var accentY=160-accentH;
+  var windows=stage>=2?'<rect x="'+(x+4)+'" y="'+(baseY+10)+'" width="5" height="3" fill="'+accentColor+'"/><rect x="'+(x+13)+'" y="'+(baseY+10)+'" width="5" height="3" fill="'+accentColor+'"/>':'';
+  var crown=stage>=3?'<rect x="'+(x-2)+'" y="'+(accentY-6)+'" width="28" height="4" fill="'+accentColor+'"/>':'';
+  var glow=stage>=3?'<circle cx="'+(x+12)+'" cy="'+(accentY-10)+'" r="3" fill="'+accentColor+'" opacity="0.6"/>':'';
+  return '<g>'
+    +'<rect x="'+x+'" y="'+baseY+'" width="24" height="'+baseH+'" fill="'+color+'" rx="2"/>'
+    +'<rect x="'+(x+6)+'" y="'+towerY+'" width="12" height="'+towerH+'" fill="'+darkColor+'" rx="2"/>'
+    +windows+crown+glow
+    +'<text x="'+(x+12)+'" y="'+(baseY-4)+'" font-size="7" fill="'+accentColor+'" text-anchor="middle" font-family="system-ui">'+label+'</text>'
+    +'</g>';
+}
+
 function renderCity(app){
   var unlocked=getUnlocked(),lvl=getLvl().lvl;
-  var d1o=unlocked.indexOf(0)>-1?1:0.15;
-  var d2o=unlocked.indexOf(1)>-1?1:0.1;
-  var d3o=unlocked.indexOf(2)>-1?0.85:0.08;
   var cw=document.createElement("div");cw.className="city-wrap";
   var sb=document.createElement("div");sb.className="city-svg-box";
+
+  var stages=[0,1,2,3,4,5].map(function(i){return getDistrictStage(i);});
+  var d1=buildDistrictSVG(0,95,"#3C3489","#2C2469","#AFA9EC",stages[0],"D1");
+  var d2=buildDistrictSVG(1,135,"#854F0B","#633806","#EF9F27",stages[1],"D2");
+  var d3=buildDistrictSVG(2,175,"#0F6E56","#085041","#5DCAA5",stages[2],"D3");
+  var d4=buildDistrictSVG(3,215,"#831342","#5a0d2d","#ED93B1",stages[3],"D4");
+  var d5=buildDistrictSVG(4,255,"#7a2d12","#4d1c0a","#F0997B",stages[4],"D5");
+  var d6=buildDistrictSVG(5,295,"#0c3a7a","#082857","#85B7EB",stages[5],"D6");
+
   sb.innerHTML='<svg viewBox="0 0 360 202" xmlns="http://www.w3.org/2000/svg">'
     +'<rect width="360" height="202" fill="#0F0F14"/>'
     +'<rect x="0" y="160" width="360" height="42" fill="#1A1A24"/>'
     +'<rect x="0" y="155" width="360" height="8" fill="#13131C"/>'
-    +'<g opacity="0.5"><rect x="10" y="120" width="14" height="40" fill="#242433" rx="2"/><rect x="28" y="130" width="10" height="30" fill="#1E1E2C" rx="1"/><rect x="42" y="110" width="16" height="50" fill="#242433" rx="2"/><rect x="60" y="125" width="12" height="35" fill="#1E1E2C" rx="1"/><rect x="310" y="118" width="16" height="42" fill="#1E1E2C" rx="2"/><rect x="330" y="120" width="14" height="40" fill="#242433" rx="2"/></g>'
-    +'<g opacity="'+d1o+'">'
-    +'<rect x="100" y="88" width="22" height="72" fill="#3C3489" rx="2"/>'
-    +'<rect x="98" y="85" width="26" height="5" fill="#534AB7"/>'
-    +'<rect x="125" y="98" width="16" height="62" fill="#2C2469" rx="2"/>'
-    +'<rect x="148" y="93" width="20" height="67" fill="#3C3489" rx="2"/>'
-    +'<rect x="146" y="90" width="24" height="5" fill="#534AB7"/>'
-    +'<rect x="108" y="138" width="6" height="3" fill="#F5C842"/>'
-    +'<rect x="116" y="138" width="6" height="3" fill="#F5C842"/>'
-    +'<rect x="108" y="108" width="6" height="3" fill="#7F77DD"/>'
-    +'<text x="122" y="82" font-size="7" fill="#AFA9EC" text-anchor="middle" font-family="system-ui">D1</text>'
-    +'</g>'
-    +'<g opacity="'+d2o+'">'
-    +'<rect x="172" y="103" width="18" height="57" fill="#854F0B" rx="2"/>'
-    +'<rect x="170" y="100" width="22" height="5" fill="#EF9F27"/>'
-    +'<rect x="193" y="110" width="14" height="50" fill="#633806" rx="2"/>'
-    +'<rect x="210" y="96" width="20" height="64" fill="#854F0B" rx="2"/>'
-    +'<rect x="208" y="93" width="24" height="5" fill="#EF9F27"/>'
-    +'<text x="196" y="89" font-size="7" fill="#EF9F27" text-anchor="middle" font-family="system-ui">D2</text>'
-    +'</g>'
-    +'<g opacity="'+d3o+'">'
-    +'<rect x="237" y="110" width="14" height="50" fill="#0F6E56" rx="2"/>'
-    +'<rect x="253" y="118" width="12" height="42" fill="#085041" rx="2"/>'
-    +'<rect x="267" y="104" width="16" height="56" fill="#0F6E56" rx="2"/>'
-    +'<text x="254" y="98" font-size="7" fill="#1D9E75" text-anchor="middle" font-family="system-ui">D3</text>'
-    +'</g>'
-    +'<rect x="0" y="0" width="360" height="28" fill="rgba(15,15,20,0.85)"/>'
-    +'<text x="10" y="18" font-size="9" fill="#605850" font-family="system-ui">Week '+S.week+' of 12</text>'
+    +'<g opacity="0.4"><rect x="10" y="125" width="12" height="35" fill="#242433" rx="1"/><rect x="26" y="132" width="8" height="28" fill="#1E1E2C" rx="1"/><rect x="338" y="122" width="12" height="38" fill="#1E1E2C" rx="1"/><rect x="354" y="128" width="8" height="32" fill="#242433" rx="1"/></g>'
+    +d1+d2+d3+d4+d5+d6
+    +'<rect x="0" y="0" width="360" height="28" fill="rgba(15,15,20,0.9)"/>'
+    +'<text x="10" y="18" font-size="9" fill="#605850" font-family="system-ui">Week '+S.week+' · Level '+lvl+'</text>'
     +'<text x="350" y="18" font-size="9" fill="#A09890" font-family="system-ui" text-anchor="end">'+getLvl().name+'</text>'
-    +'<circle cx="313" cy="12" r="7" fill="#1A1A24"/>'
-    +'<circle cx="289" cy="5" r="1.5" fill="#F5C842"/>'
-    +'<circle cx="275" cy="9" r="1" fill="#A09890"/>'
+    +'<circle cx="289" cy="5" r="1.5" fill="#F5C842"/><circle cx="275" cy="9" r="1" fill="#A09890"/><circle cx="302" cy="11" r="1" fill="#A09890"/>'
     +'</svg>';
   cw.appendChild(sb);
   var phase=document.createElement("div");phase.className="city-phase";
+  var nxt2=getNxt();
   phase.textContent=lvl<=2
-    ?"The ruins await clearing \u2014 complete Pre-Week tasks to begin building"
-    :lvl<=4
-    ?"The Foundation rises \u2014 earn "+(500-S.xp)+" more XP to unlock The Market"
-    :"The city is transforming \u2014 keep building";
+    ?"The ruins await clearing — complete Pre-Week tasks to begin building"
+    :nxt2
+    ?"Level "+nxt2.lvl+" in "+(nxt2.xp-S.xp)+" XP — "+nxt2.unlock
+    :"The city is yours.";
   cw.appendChild(phase);
+
+  // Stage bar — shows all 6 districts with visual stage dots
+  var stageBar=document.createElement("div");stageBar.className="city-stage-bar";
+  var stageNames=["Foundation","Market","Gallery","Commons","Workshop","Academy"];
+  var stageColors=["#7F77DD","#EF9F27","#1D9E75","#D4537E","#D85A30","#378ADD"];
+  stages.forEach(function(s,i){
+    var isU=unlocked.indexOf(i)>-1;
+    var pill=document.createElement("div");pill.className="city-stage-pill"+(isU?" active":"");
+    var nm=document.createElement("span");nm.className="city-stage-name";nm.textContent=stageNames[i];
+    var dots=document.createElement("div");dots.className="city-stage-dots";
+    for(var d=0;d<3;d++){
+      var dot=document.createElement("div");
+      dot.className="city-stage-dot"+(d<s?" filled":"");
+      if(d<s) dot.style.background=stageColors[i];
+      dots.appendChild(dot);
+    }
+    pill.appendChild(nm);pill.appendChild(dots);stageBar.appendChild(pill);
+  });
+  cw.appendChild(stageBar);
+
   var grid=document.createElement("div");grid.className="district-grid";
   var districts=[
     {name:"The Foundation",seed:"Seed 6",color:"#7F77DD",cat:"Work"},
@@ -914,14 +1005,140 @@ function renderCity(app){
   ];
   districts.forEach(function(d,i){
     var isU=unlocked.indexOf(i)>-1;
+    var s=stages[i];
+    var stageLabel=["Ruins","Foundation","Rising","Complete"][s];
     var card=document.createElement("div");card.className="d-card"+(isU?" ul":" lk");
     var rel=(TASKS[S.week]||[]).filter(function(t){return t.cat===d.cat;});
     var dn=rel.filter(function(t){return S.checked[t.id]==="done";}).length;
     var pct=rel.length>0?Math.round((dn/rel.length)*100):0;
-    card.innerHTML='<div class="d-name">'+d.name+'</div><div class="d-seed">'+d.seed+(isU?" \u00b7 Active":" \u00b7 Locked")+'</div><div class="d-bar"><div class="d-fill" style="width:'+pct+'%;background:'+d.color+'"></div></div>';
+    card.innerHTML='<div class="d-name">'+d.name+'</div>'
+      +'<div class="d-seed">'+d.seed+' · <span style="color:'+(isU?d.color:"var(--text3)")+'">'+stageLabel+'</span></div>'
+      +'<div class="d-bar"><div class="d-fill" style="width:'+pct+'%;background:'+d.color+'"></div></div>';
     grid.appendChild(card);
   });
   cw.appendChild(grid);app.appendChild(cw);
+}
+
+
+function renderSettings(app){
+  var screen=document.createElement("div");screen.className="settings-screen";
+
+  // ── Daily rhythm ──
+  var s1=document.createElement("div");s1.className="settings-section";
+  var t1=document.createElement("div");t1.className="settings-section-title";t1.textContent="Daily rhythm";
+  s1.appendChild(t1);
+
+  // Default EOD time
+  var eodRow=document.createElement("div");eodRow.className="settings-row";
+  var eodInner=document.createElement("div");eodInner.className="sr-inner";
+  var eodLbl=document.createElement("div");eodLbl.className="sr-label";
+  eodLbl.innerHTML='<div>Default end-of-day time</div><div class="sr-sub">Override each morning when needed</div>';
+  var eodInp=document.createElement("input");eodInp.className="sr-time-inp";eodInp.type="time";eodInp.value=S.eodDefault||"21:00";
+  eodInp.onchange=function(){S.eodDefault=eodInp.value;save();};
+  eodInner.appendChild(eodLbl);eodInner.appendChild(eodInp);eodRow.appendChild(eodInner);s1.appendChild(eodRow);
+
+  // Default energy
+  var energyRow=document.createElement("div");energyRow.className="settings-row";
+  var energyInner=document.createElement("div");energyInner.className="sr-inner";
+  var energyLbl=document.createElement("div");energyLbl.className="sr-label";
+  energyLbl.innerHTML='<div>Default energy level</div><div class="sr-sub">Starting point each morning</div>';
+  var energySel=document.createElement("select");energySel.className="sr-select";
+  ["Low","Medium","High"].forEach(function(e){
+    var opt=document.createElement("option");opt.value=e;opt.textContent=e;
+    if(S.defaultEnergy===e) opt.selected=true;
+    energySel.appendChild(opt);
+  });
+  energySel.onchange=function(){S.defaultEnergy=energySel.value;S.energy=energySel.value;save();};
+  energyInner.appendChild(energyLbl);energyInner.appendChild(energySel);
+  energyRow.appendChild(energyInner);s1.appendChild(energyRow);
+  screen.appendChild(s1);
+
+  // ── Data ──
+  var s2=document.createElement("div");s2.className="settings-section";
+  var t2=document.createElement("div");t2.className="settings-section-title";t2.textContent="Data";
+  s2.appendChild(t2);
+
+  // Export
+  var expBtn=document.createElement("button");expBtn.className="settings-export-btn";
+  expBtn.textContent="⤓  Export progress as JSON";
+  expBtn.onclick=function(){
+    var data=JSON.stringify(S,null,2);
+    var blob=new Blob([data],{type:"application/json"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");a.href=url;
+    a.download="the-architect-save-"+new Date().toISOString().split("T")[0]+".json";
+    a.click();URL.revokeObjectURL(url);
+  };
+  s2.appendChild(expBtn);
+
+  // Import
+  var impLabel=document.createElement("label");impLabel.className="settings-import-label";
+  impLabel.textContent="⤒  Import progress from JSON";
+  var impInp=document.createElement("input");impInp.className="settings-import-inp";impInp.type="file";impInp.accept=".json";
+  impInp.onchange=function(e){
+    var file=e.target.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        var imported=JSON.parse(ev.target.result);
+        Object.keys(imported).forEach(function(k){S[k]=imported[k];});
+        save();
+        S.settingsMsg="Progress imported successfully.";
+        render();
+      }catch(err){
+        S.settingsMsg="Import failed: file may be corrupt.";
+        render();
+      }
+    };
+    reader.readAsText(file);
+  };
+  impLabel.appendChild(impInp);s2.appendChild(impLabel);
+
+  if(S.settingsMsg){
+    var msg=document.createElement("div");msg.className="settings-confirm";msg.textContent=S.settingsMsg;s2.appendChild(msg);
+    setTimeout(function(){S.settingsMsg=null;save();},3000);
+  }
+  screen.appendChild(s2);
+
+  // ── App ──
+  var s3=document.createElement("div");s3.className="settings-section";
+  var t3=document.createElement("div");t3.className="settings-section-title";t3.textContent="App";
+  s3.appendChild(t3);
+
+  // Replay walkthrough
+  var replayRow=document.createElement("div");replayRow.className="settings-row";
+  var replayInner=document.createElement("div");replayInner.className="sr-inner";
+  replayInner.innerHTML='<div class="sr-label">Replay the walkthrough</div>';
+  var replayBtn=document.createElement("span");replayBtn.className="sr-action";replayBtn.textContent="Replay";
+  replayBtn.onclick=function(){S.onboardingDone=false;S.wtStep=0;save();render();};
+  replayInner.appendChild(replayBtn);replayRow.appendChild(replayInner);s3.appendChild(replayRow);
+
+  // Reset first-visit banners
+  var fvRow=document.createElement("div");fvRow.className="settings-row";
+  var fvInner=document.createElement("div");fvInner.className="sr-inner";
+  fvInner.innerHTML='<div class="sr-label"><div>Reset tab intro banners</div><div class="sr-sub">See first-visit tips again on each tab</div></div>';
+  var fvBtn=document.createElement("span");fvBtn.className="sr-action";fvBtn.textContent="Reset";
+  fvBtn.onclick=function(){S.fvSeen={};save();S.settingsMsg="Tab banners reset.";render();};
+  fvInner.appendChild(fvBtn);fvRow.appendChild(fvInner);s3.appendChild(fvRow);
+  screen.appendChild(s3);
+
+  // ── Danger zone ──
+  var s4=document.createElement("div");s4.className="settings-section";
+  var t4=document.createElement("div");t4.className="settings-section-title";t4.textContent="Danger zone";
+  s4.appendChild(t4);
+
+  var resetBtn=document.createElement("button");resetBtn.className="settings-danger-btn";
+  resetBtn.textContent="⚠  Reset all progress";
+  resetBtn.onclick=function(){
+    if(!confirm("This will erase all XP, tasks, reviews, and progress. Export first if you want a backup. Are you sure?")) return;
+    var fresh={xp:0,level:1,streak:0,lastDate:null,checked:{},skipCounts:{},energy:S.defaultEnergy||"Medium",week:"0",view:"today",carriedTasks:{},customTasks:{},overrides:{},deletedIds:{},bossDone:{},showLU:false,luData:null,openMenu:null,editModal:null,addModal:null,reviewData:{},reviewHistory:[],parkingLot:[],reviewSaved:false,setupDone:{},setupDismissed:false,plannerOpen:true,expandedReviews:{},defaultEnergy:S.defaultEnergy||"Medium",eodDefault:S.eodDefault||"21:00",eodToday:null,eodConfirmedDate:null,timeViewOpen:false,lastRealloc:null,onboardingDone:false,wtStep:0,fvSeen:{},helpOpen:false,helpTab:"today",settingsMsg:"Progress reset. The Architect begins again."};
+    Object.keys(fresh).forEach(function(k){S[k]=fresh[k];});
+    save();render();
+  };
+  s4.appendChild(resetBtn);
+  screen.appendChild(s4);
+
+  app.appendChild(screen);
 }
 
 function renderReview(app){
@@ -957,17 +1174,86 @@ function renderReview(app){
     card.appendChild(qrow);
   });
   if(S.reviewSaved){
-    var saved=document.createElement("div");saved.className="r-saved";saved.textContent="Week "+S.week+" review saved \u2713 (+30 XP)";card.appendChild(saved);
+    var saved=document.createElement("div");saved.className="r-saved";saved.textContent="Week "+S.week+" review saved ✓ (+30 XP)";card.appendChild(saved);
   } else {
-    var saveBtn=document.createElement("button");saveBtn.className="r-save-btn";saveBtn.textContent="Save this week's review (+30 XP)";
+    var saveBtn=document.createElement("button");saveBtn.className="r-save-btn";saveBtn.textContent="Save this week’s review (+30 XP)";
     saveBtn.onclick=function(){
       var prev=getLvl().lvl;S.reviewSaved=true;S.xp+=30;
+      // Save to history
+      var entry=Object.assign({},S.reviewData,{
+        week:S.week,savedAt:new Date().toISOString(),
+        weekLabel:"Week "+(S.week==="0"?"Pre-Week":S.week)
+      });
+      if(!S.reviewHistory) S.reviewHistory=[];
+      var existingIdx=S.reviewHistory.findIndex(function(r){return r.week===S.week;});
+      if(existingIdx>-1) S.reviewHistory[existingIdx]=entry;
+      else S.reviewHistory.push(entry);
       var now=getLvl();if(now.lvl>prev){S.showLU=true;S.luData=now;}
       save();renderReview(app);
     };
     card.appendChild(saveBtn);
   }
-  screen.appendChild(card);app.appendChild(screen);
+  screen.appendChild(card);
+
+  // Review history
+  renderReviewHistory(screen);
+  app.appendChild(screen);
+}
+
+function renderReviewHistory(container){
+  if(!S.reviewHistory||S.reviewHistory.length===0) return;
+  var rh=document.createElement("div");rh.className="review-history";
+  var title=document.createElement("div");title.className="rh-title";title.textContent="Review history";
+  rh.appendChild(title);
+
+  // Score trend chart
+  var chart=document.createElement("div");chart.className="rh-chart";
+  var clbl=document.createElement("div");clbl.className="rh-chart-label";clbl.textContent="Days the rhythm held per week";
+  chart.appendChild(clbl);
+  var bars=document.createElement("div");bars.className="rh-bars";
+  var weeks=["0","1","2","3","4"];
+  weeks.forEach(function(w){
+    var entry=(S.reviewHistory||[]).find(function(r){return r.week===w;});
+    var score=entry?parseInt(entry.score)||0:0;
+    var pct=Math.round((score/7)*100);
+    var wrap=document.createElement("div");wrap.className="rh-bar-wrap";
+    var bar=document.createElement("div");bar.className="rh-bar";
+    bar.style.cssText="height:"+Math.max(pct*0.48,2)+"px;background:"+(score>=5?"var(--teal)":score>=3?"var(--amber)":"var(--red)");
+    var lbl=document.createElement("div");lbl.className="rh-bar-lbl";
+    lbl.textContent=w==="0"?"P":"W"+w;
+    wrap.appendChild(bar);wrap.appendChild(lbl);bars.appendChild(wrap);
+  });
+  chart.appendChild(bars);rh.appendChild(chart);
+
+  // Individual entries
+  var sorted=(S.reviewHistory||[]).slice().reverse();
+  sorted.forEach(function(entry){
+    var div=document.createElement("div");div.className="rh-entry";
+    var isExp=!!S.expandedReviews[entry.week];
+    var hdr=document.createElement("div");hdr.className="rh-entry-hdr";
+    hdr.innerHTML='<span class="rh-entry-week">'+entry.weekLabel+'</span>'
+      +'<span class="rh-entry-score">'+(entry.score?entry.score+"/7 days":"—")+'</span>';
+    hdr.onclick=function(){
+      if(!S.expandedReviews) S.expandedReviews={};
+      S.expandedReviews[entry.week]=!S.expandedReviews[entry.week];
+      save();renderReview(container.parentElement||document.getElementById("app"));
+    };
+    div.appendChild(hdr);
+    if(isExp){
+      var body=document.createElement("div");body.className="rh-entry-body";
+      var qMap={moved:"What moved",blocked:"What blocked",next6:"Seed 6 next task",next2:"Seed 2 next task",adjust:"Plan adjustment"};
+      Object.entries(qMap).forEach(function(kv){
+        var k=kv[0],label=kv[1];
+        if(!entry[k]) return;
+        var q=document.createElement("div");q.className="rh-q";
+        q.innerHTML='<div class="rh-q-lbl">'+label+'</div><div class="rh-q-val">'+entry[k]+'</div>';
+        body.appendChild(q);
+      });
+      div.appendChild(body);
+    }
+    rh.appendChild(div);
+  });
+  container.appendChild(rh);
 }
 
 function renderVision(app){
@@ -1230,6 +1516,9 @@ function renderModal(app, type){
         Object.keys(S.customTasks).forEach(function(k){
           S.customTasks[k]=S.customTasks[k].map(function(t){return t.id===m.id?Object.assign({},t,updates):t;});
         });
+      } else if(m.isRecurring){
+        // Edit recurring task: save to baseId so all weeks inherit
+        S.overrides[m.baseId]=updates;
       } else {
         S.overrides[m.id]=updates;
       }
@@ -1554,6 +1843,49 @@ function applyTimeOrdering(tasks){
     return 0;
   });
   return tasks;
+}
+
+
+// ══════════════════════════════════════════
+// RECURRING TASK SYSTEM
+// ══════════════════════════════════════════
+
+var RECURRING_TEMPLATES=[
+  {baseId:"rec_anchor",cat:"Routine",seed:"System",name:"Morning Anchor in Routinery",action:"Routinery > Morning Anchor. Follow each step. No other app until Phone unlocked. Low mobility: seated counts.",time:"20-25 min",depth:"deep",mvd:true},
+  {baseId:"rec_pages",cat:"Mind",seed:"System",name:"Morning Pages: 3 pages",action:"Notebook at anchor spot. 25 min timer. Write continuously. No editing, no rereading.",time:"25-30 min",depth:"deep",mvd:true},
+  {baseId:"rec_faith",cat:"Soul",seed:"System",name:"Faith moment: one passage, quiet",action:"Bible app or Enduring Word. One passage. 5-10 min quiet. Same anchor time every day.",time:"10-15 min",depth:"shallow",mvd:true},
+  {baseId:"rec_move",cat:"Body",seed:"System",name:"Movement: any form",action:"Walk, stretch, anything. Low mobility: seated fully counts. Showing up matters more than intensity.",time:"15-25 min",depth:"shallow"},
+  {baseId:"rec_close",cat:"Routine",seed:"System",name:"Evening Close in Routinery",action:"Routinery > Evening Close. Inbox to zero. Tomorrow's one task per seed in Notes and planner. Phone outside bedroom.",time:"20-25 min",depth:"shallow",mvd:true}
+];
+
+function getRecurringId(baseId,week){return baseId+"_w"+week;}
+
+function getRecurringTasks(week){
+  return RECURRING_TEMPLATES.map(function(t){
+    var id=getRecurringId(t.baseId,week);
+    var override=S.overrides[t.baseId]||{};
+    return Object.assign({},t,override,{id:id,recurring:true,baseId:t.baseId});
+  });
+}
+
+function getWeekTasks(week){
+  var base=(TASKS[week]||[])
+    .filter(function(t){return!S.deletedIds[t.id];})
+    .map(function(t){return S.overrides[t.id]?Object.assign({},t,S.overrides[t.id]):t;});
+  // Remove any hardcoded recurring tasks (they are now generated)
+  var recurringCats=["Routine","Mind","Soul","Body"];
+  var recurringNames=["Morning Anchor","Morning Pages","Faith moment","Movement","Evening Close"];
+  var filtered=base.filter(function(t){
+    if(!recurringCats.includes(t.cat)) return true;
+    var isHardcodedRecurring=recurringNames.some(function(n){return t.name.startsWith(n);});
+    return !isHardcodedRecurring;
+  });
+  var recurring=getRecurringTasks(week);
+  var carried=(S.carriedTasks[week]||[]).filter(function(t){return!S.deletedIds[t.id];});
+  var custom=(S.customTasks["w"+week]||[]).filter(function(t){return!S.deletedIds[t.id];});
+  return recurring.concat(filtered)
+    .concat(carried.map(function(t){return Object.assign({},t,{carried:true});}))
+    .concat(custom);
 }
 
 // ══════════════════════════════════════════
