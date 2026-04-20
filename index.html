@@ -1410,11 +1410,13 @@ function makeCard(task){
 
   var si=document.createElement("div");si.className="skip-info";
   if(task._blocked&&task._blockingTasks&&task._blockingTasks.length>0){
-    // Find names of blocking tasks
+    // Find names of blocking tasks — check both taskId and recurring baseId
     var allTasks=getWeekTasks(S.week);
+    var recurringNames={"rec_anchor":"Morning Anchor in Routinery","rec_pages":"Morning Pages notebook placement","rec_faith":"Faith moment anchor spot","rec_close":"Evening Close setup","rec_move":"Movement"};
     var blockNames=task._blockingTasks.map(function(bid){
+      if(recurringNames[bid]) return recurringNames[bid];
       var bt=allTasks.find(function(t){return t.id===bid;});
-      return bt?bt.name.substring(0,40)+"\u2026":bid;
+      return bt?bt.name.substring(0,45)+"\u2026":bid;
     });
     si.style.color="#FAC775";
     si.textContent="\u23f3 Waiting for: "+blockNames.join(", ");
@@ -1953,10 +1955,23 @@ function getWeekTasks(week){
 // Hard dependencies: task cannot be recommended until blocker is done
 // Format: { taskId: [blockerId, ...] }
 var TASK_DEPS = {
+  // ── PHYSICAL SPACE PRECONDITIONS ──
+  // Rule: clearing a space → setting it up → using it daily
+  "p02": [],                // anchor spot clearing — no precondition, this creates the space
+  "p06": ["p02","p05"],     // place notebook needs anchor spot cleared AND planner committed
+  "p03": [],                // move phone charger — standalone, no precondition
+
+  // Recurring habits need their physical space to exist first
+  // rec_anchor_w0 etc are generated ids — we use baseIds for dep checks
+  "rec_anchor": ["p02","p10"],  // Morning Anchor needs: spot cleared + Routinery built
+  "rec_pages":  ["p06"],         // Morning Pages needs: notebook placed at anchor spot
+  "rec_faith":  ["p02"],         // Faith moment needs: anchor spot to sit at
+  "rec_move":   [],              // Movement — no space dependency, happens anywhere
+  "rec_close":  ["p11","p08"],   // Evening Close needs: Reminders set up + routine built
+
   // Pre-Week: clear before build
   "p23": ["p04"],           // clothes sort needs bins
   "p24": ["p04"],           // beauty sort needs bins
-  "p06": ["p05"],           // notebook placement needs planner committed
   "p11": ["p10"],           // build Notes structure on clean slate
   "p13": ["p12"],           // GTD lists need Reminders cleared
   "p15": ["p14"],           // Seeds calendar after old calendar cleared
@@ -2051,18 +2066,35 @@ Object.entries(TASK_ARCS).forEach(function(kv) {
   });
 });
 
-function isTaskBlocked(taskId) {
-  var blockers = TASK_DEPS[taskId];
-  if (!blockers || blockers.length === 0) return false;
-  return blockers.some(function(bid) {
-    return S.checked[bid] !== "done";
+function isCheckedDone(taskId) {
+  // Check direct taskId OR any week-specific instance of a recurring baseId
+  if (S.checked[taskId] === "done") return true;
+  // Check recurring instances: rec_anchor_w0, rec_anchor_w1 etc
+  var weekKeys = ["0","1","2","3","4"];
+  return weekKeys.some(function(w) {
+    return S.checked[taskId + "_w" + w] === "done";
   });
 }
 
-function getBlockingTasks(taskId) {
-  var blockers = TASK_DEPS[taskId] || [];
+function isTaskBlocked(task) {
+  // Accept either a task object or a taskId string
+  var taskId = typeof task === "string" ? task : task.id;
+  var baseId = typeof task === "object" ? (task.baseId || taskId) : taskId;
+
+  // Check deps by taskId first, then by baseId (for recurring tasks)
+  var blockers = TASK_DEPS[taskId] || TASK_DEPS[baseId] || [];
+  if (blockers.length === 0) return false;
+  return blockers.some(function(bid) {
+    return !isCheckedDone(bid);
+  });
+}
+
+function getBlockingTasks(task) {
+  var taskId = typeof task === "string" ? task : task.id;
+  var baseId = typeof task === "object" ? (task.baseId || taskId) : taskId;
+  var blockers = TASK_DEPS[taskId] || TASK_DEPS[baseId] || [];
   return blockers.filter(function(bid) {
-    return S.checked[bid] !== "done";
+    return !isCheckedDone(bid);
   });
 }
 
@@ -2081,7 +2113,7 @@ function getTaskPriorityV2(task, minsLeft, phase) {
   if (range.lo > minsLeft) return -2; // won't fit
 
   // Blocked by dependency = cannot do yet
-  if (isTaskBlocked(task.id)) return -3;
+  if (isTaskBlocked(task)) return -3;
 
   var status = S.checked[task.id] || "";
   if (status === "done" || status === "skip") return -1;
@@ -2149,7 +2181,7 @@ function applyTimeOrderingV2(tasks) {
     t._blocked = blockedIds.indexOf(t.id) > -1;
     t._fitRank = fitIds.indexOf(t.id);
     t._arcInfo = TASK_ARC_LOOKUP[t.id] || null;
-    t._blockingTasks = getBlockingTasks(t.id);
+    t._blockingTasks = getBlockingTasks(t);
   });
 
   tasks.sort(function(a, b) {
