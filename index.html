@@ -2465,6 +2465,10 @@ function getArcProgress(arcId) {
 
 // ── Enhanced task priority that respects dependencies ──
 function getTaskPriorityV2(task, minsLeft, phase) {
+  // Morning Anchor and Evening Close excluded from Focus Now entirely
+  var _baseId = task.baseId || task.id.replace(/_w[0-9]+$/, '');
+  if (_baseId === 'rec_anchor' || _baseId === 'rec_close') return -2;
+
   var range = getTaskMinRange(task);
   if (range.lo > minsLeft) return -2; // won't fit
 
