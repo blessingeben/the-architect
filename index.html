@@ -1471,18 +1471,37 @@ function renderBoss(app){
 }
 
 function renderParking(app){
+  // Migrate old items that have no type — default to idea
+  S.parkingLot=S.parkingLot.map(function(p){
+    if(!p.type) p.type=p.skipped?"someday":"idea";
+    if(!p.id) p.id=uid();
+    if(!p.from) p.from="Parking lot";
+    return p;
+  });
   var screen=document.createElement("div");screen.className="parking-screen";
   var sm=S.parkingLot.filter(function(p){return p.type==="someday";});
-  var ideas=S.parkingLot.filter(function(p){return p.type==="idea";});
+  var ideas=S.parkingLot.filter(function(p){return p.type!=="someday";});
 
   var sl1=document.createElement("div");sl1.className="p-section-title";sl1.innerHTML='<div class="p-dot" style="background:#605850"></div>Someday Maybe ('+sm.length+')';screen.appendChild(sl1);
   if(!sm.length){
     var e=document.createElement("div");e.style.cssText="background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:12px;color:var(--text3);font-style:italic;margin-bottom:10px";
     e.textContent="Tasks skipped twice land here automatically.";screen.appendChild(e);
   }
-  sm.forEach(function(p){
+  function makeParkingItem(p){
     var item=document.createElement("div");item.className="p-item";
-    item.innerHTML='<div class="p-name">'+p.name+'</div><div class="p-meta">'+p.from+'</div>';
+    var topRow=document.createElement("div");topRow.style.cssText="display:flex;align-items:flex-start;justify-content:space-between;gap:8px";
+    var nameWrap=document.createElement("div");
+    var nm=document.createElement("div");nm.className="p-name";nm.textContent=p.name;
+    var mt=document.createElement("div");mt.className="p-meta";mt.textContent=p.from||"Parking lot";
+    nameWrap.appendChild(nm);nameWrap.appendChild(mt);
+    var delBtn=document.createElement("span");delBtn.style.cssText="color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;flex-shrink:0;-webkit-tap-highlight-color:transparent";
+    delBtn.textContent="×";
+    (function(pid){delBtn.onclick=function(){S.parkingLot=S.parkingLot.filter(function(x){return x.id!==pid;});save();render();};})(p.id);
+    topRow.appendChild(nameWrap);topRow.appendChild(delBtn);item.appendChild(topRow);
+    return item;
+  }
+  sm.forEach(function(p){
+    var item=makeParkingItem(p);
     var mv=document.createElement("div");mv.style.marginTop="6px";
     var mvLabel=document.createElement("div");mvLabel.style.cssText="font-size:10px;color:var(--text3);margin-bottom:4px";mvLabel.textContent="Move to week:";
     mv.appendChild(mvLabel);
@@ -1495,8 +1514,22 @@ function renderParking(app){
         var itm=S.parkingLot.find(function(x){return x.id===pid;});if(!itm)return;
         var k="w"+wk;
         if(!S.customTasks[k])S.customTasks[k]=[];
-        S.customTasks[k].push({id:uid(),cat:"Custom",seed:"Custom",name:itm.name,action:"",time:"?",xp:10,depth:"shallow",custom:true});
+        // Preserve original task fields if available, fall back to Custom
+        var newTask={
+          id:uid(),
+          cat:itm.cat||"Custom",
+          seed:itm.seed||"Custom",
+          name:itm.name,
+          action:itm.action||"",
+          time:itm.time||"?",
+          xp:itm.xp||10,
+          depth:itm.depth||"shallow",
+          custom:true
+        };
+        S.customTasks[k].push(newTask);
         S.parkingLot=S.parkingLot.filter(function(x){return x.id!==pid;});
+        // Switch to that week so user sees it land
+        S.week=wk;S.view="today";
         save();render();
       };})(p.id,opt.week);
       mvBtns.appendChild(btn);
@@ -1507,8 +1540,7 @@ function renderParking(app){
 
   var sl2=document.createElement("div");sl2.className="p-section-title";sl2.style.marginTop="14px";sl2.innerHTML='<div class="p-dot" style="background:#378ADD"></div>Ideas and future seeds ('+ideas.length+')';screen.appendChild(sl2);
   ideas.forEach(function(p){
-    var item=document.createElement("div");item.className="p-item";
-    item.innerHTML='<div class="p-name">'+p.name+'</div><div class="p-meta">'+p.from+'</div>';
+    var item=makeParkingItem(p);
     var mv=document.createElement("div");mv.style.marginTop="6px";
     var mvLabel=document.createElement("div");mvLabel.style.cssText="font-size:10px;color:var(--text3);margin-bottom:4px";mvLabel.textContent="Move to week:";
     mv.appendChild(mvLabel);
@@ -1521,8 +1553,22 @@ function renderParking(app){
         var itm=S.parkingLot.find(function(x){return x.id===pid;});if(!itm)return;
         var k="w"+wk;
         if(!S.customTasks[k])S.customTasks[k]=[];
-        S.customTasks[k].push({id:uid(),cat:"Custom",seed:"Custom",name:itm.name,action:"",time:"?",xp:10,depth:"shallow",custom:true});
+        // Preserve original task fields if available, fall back to Custom
+        var newTask={
+          id:uid(),
+          cat:itm.cat||"Custom",
+          seed:itm.seed||"Custom",
+          name:itm.name,
+          action:itm.action||"",
+          time:itm.time||"?",
+          xp:itm.xp||10,
+          depth:itm.depth||"shallow",
+          custom:true
+        };
+        S.customTasks[k].push(newTask);
         S.parkingLot=S.parkingLot.filter(function(x){return x.id!==pid;});
+        // Switch to that week so user sees it land
+        S.week=wk;S.view="today";
         save();render();
       };})(p.id,opt.week);
       mvBtns.appendChild(btn);
@@ -1537,7 +1583,7 @@ function renderParking(app){
   ab.onclick=function(){
     var v=ai.value.trim();if(!v)return;
     S.parkingLot.push({id:uid(),name:v,from:"Added manually",type:"idea"});
-    ai.value="";save();renderParking(app);
+    ai.value="";save();render();
   };
   var pr=document.createElement("div");pr.className="p-add-row";pr.appendChild(ai);pr.appendChild(ab);ar.appendChild(pr);screen.appendChild(ar);
   app.appendChild(screen);
