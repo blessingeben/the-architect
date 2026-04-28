@@ -1711,9 +1711,12 @@ function makeCard(task){
   else si.textContent="Skip: carries once. Twice \u2192 Parking Lot.";
   body.appendChild(si);
 
-  var sb=document.createElement("button");sb.className="skip-btn";sb.textContent=isSkip?"undo skip":"skip today";
-  sb.onclick=function(e){e.stopPropagation();if(isSkip){S.checked[task.id]="";save();render();}else{handleSkip(task);}};
-  body.appendChild(sb);
+  // Daily quest tasks don't support skip (no carry-forward, date-keyed state)
+  if(!_isDaily){
+    var sb=document.createElement("button");sb.className="skip-btn";sb.textContent=isSkip?"undo skip":"skip today";
+    sb.onclick=function(e){e.stopPropagation();if(isSkip){S.checked[task.id]="";save();render();}else{handleSkip(task);}};
+    body.appendChild(sb);
+  }
 
   var dots=document.createElement("div");dots.className="tdots";dots.textContent="\u2022\u2022\u2022";
   dots.onclick=function(e){e.stopPropagation();S.openMenu=isMenuOpen?null:task.id;render();};
