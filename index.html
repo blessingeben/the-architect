@@ -2052,7 +2052,11 @@ function renderEODSetup(app){
 function renderFocusBanner(app,tasks){
   var minsLeft=getMinutesLeft();
   var rec=getRecommendedStackV2(tasks,minsLeft);
-  var nextTask=rec.fits[0]||null;
+  // Extra guard: never show Morning Anchor or Evening Close in Focus Now
+  var nextTask=(rec.fits.filter(function(t){
+    var bid=t.baseId||t.id.replace(/_w[0-9]+$/,'');
+    return bid!=='rec_anchor'&&bid!=='rec_close';
+  })[0])||null;
 
   var now=new Date();
   var timeStr=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
