@@ -360,7 +360,7 @@ input,textarea,select{font-family:inherit}
 .tv-realloc-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:var(–text2)}
 .tv-realloc-dot{width:5px;height:5px;border-radius:50%;background:var(–amber);flex-shrink:0}
 .tv-realloc-dest{font-size:10px;color:var(–text3);margin-left:auto}
-.task-wont-reach{opacity:0.5}
+.task-wont-reach{opacity:0.65}
 .task-wont-reach .task-name{color:var(–text3)}
 .task-blocked{opacity:0.4}
 .task-blocked .task-name{color:var(–text3)}
@@ -485,7 +485,7 @@ var DAY_BLOCKS=[
   {name:"Rest or life",type:"rest",time:"30-45 min",color:"#605850",tbg:"rgba(96,88,80,0.12)",tt:"#A09890",taskCats:["Life","Body"],hint:"Eat. Life tasks. Movement. Nap."},
   {name:"Shallow work",type:"shallow",time:"25-30 min",color:"#1D9E75",tbg:"rgba(29,158,117,0.12)",tt:"#5DCAA5",taskCats:["Physical Clearing","Digital Clearing","Paper Clearing","Zone Setup","App Setup","Paper Setup","Planning","Community"],hint:"Quick wins + clearing + capture"},
   {name:"Rest",type:"rest",time:"20 min",color:"#605850",tbg:"rgba(96,88,80,0.12)",tt:"#A09890",taskCats:[],hint:"Recovery before evening."},
-  {name:"Evening close",type:"shallow",time:"20-30 min",color:"#1D9E75",tbg:"rgba(29,158,117,0.12)",tt:"#5DCAA5",taskCats:["Routine"],hint:"Evening Close + planner prep"}
+  {name:"Evening block",type:"shallow",time:"20-30 min",color:"#1D9E75",tbg:"rgba(29,158,117,0.12)",tt:"#5DCAA5",taskCats:["Routine"],hint:"Evening Close + planner prep"}
 ];
 var SETUP_STEPS=[
   {id:"s1",title:"Move Routinery notification",desc:"Open Routinery > Morning Anchor > tap the bell icon. Set trigger to your wake time. This fires before Instagram."},
@@ -1647,7 +1647,7 @@ function makeCard(task){
   if(task.quick){var qc=document.createElement("span");qc.className="c-quick";qc.textContent="quick win";chips.appendChild(qc);}
   if(task.carried){var crc=document.createElement("span");crc.className="c-carry";crc.textContent="carried";chips.appendChild(crc);}
   if(task._recommended&&!task.carried){var rcc=document.createElement("span");rcc.className="chip-recommended";rcc.textContent="today";chips.appendChild(rcc);}
-  if(task._wontReach){var wrc=document.createElement("span");wrc.className="chip-wont-reach";wrc.textContent="won't reach";chips.appendChild(wrc);}
+  if(task._wontReach){var wrc=document.createElement("span");wrc.className="chip-wont-reach";wrc.textContent="later";chips.appendChild(wrc);}
   if(task._blocked){var blk=document.createElement("span");blk.className="chip-wont-reach";blk.style.background="rgba(96,88,80,0.15)";blk.style.color="#A09890";blk.style.borderColor="rgba(160,152,144,0.25)";blk.textContent="blocked";chips.appendChild(blk);}
   if(task._arcInfo&&!task._blocked){
     var arcI=task._arcInfo;
@@ -2135,7 +2135,7 @@ function renderTimeView(app,tasks){
     if(wontCount>0){
       var rs=document.createElement("div");rs.className="tv-realloc-section";
       var rl=document.createElement("div");rl.className="tv-realloc-lbl";
-      rl.textContent="Won’t reach today — carries forward at end of day";
+      rl.textContent="Scheduled for later — carries forward if not done";
       rs.appendChild(rl);
       rec.wontReach.forEach(function(t){
         var item=document.createElement("div");item.className="tv-realloc-item";
@@ -2393,6 +2393,9 @@ function isCheckedDone(taskId) {
 }
 
 function isTaskBlocked(task) {
+  // Daily quest tasks are NEVER blocked — always available any time
+  if (typeof task === "object" && task !== null && isDailyQuest(task)) return false;
+
   // Accept either a task object or a taskId string
   var taskId = typeof task === "string" ? task : task.id;
   var baseId = typeof task === "object" ? (task.baseId || taskId) : taskId;
@@ -2406,6 +2409,9 @@ function isTaskBlocked(task) {
 }
 
 function getBlockingTasks(task) {
+  // Daily quest tasks have no blockers
+  if (typeof task === "object" && task !== null && isDailyQuest(task)) return [];
+
   var taskId = typeof task === "string" ? task : task.id;
   var baseId = typeof task === "object" ? (task.baseId || taskId) : taskId;
   var blockers = TASK_DEPS[taskId] || TASK_DEPS[baseId] || [];
